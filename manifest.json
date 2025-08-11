@@ -10,7 +10,7 @@
   ],
   "host_permissions": [
     "*://*.mobile.de/*",
-    "https://DEIN-SEITENNAME.netlify.app/"
+    "https://carcheckai.netlify.app/"
   ],
   "background": {
     "service_worker": "background.js"

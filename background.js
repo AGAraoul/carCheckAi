@@ -37,7 +37,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // --- Neue zentrale Funktion zur Kommunikation mit deinem Backend ---
 async function callBackendForAnalysis(type, data) {
     // WICHTIG: Ersetze dies durch die URL deiner Netlify-Seite.
-    const backendUrl = 'https://DEIN-SEITENNAME.netlify.app/.netlify/functions/analyze';
+    const backendUrl = 'https://carcheckai.netlify.app/';
 
     try {
         const response = await fetch(backendUrl, {
