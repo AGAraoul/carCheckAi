@@ -10,6 +10,7 @@
   ],
   "host_permissions": [
     "*://*.mobile.de/*",
+    "*://.autoscout24.de/*",
     "https://carcheckai.netlify.app/"
   ],
   "background": {
