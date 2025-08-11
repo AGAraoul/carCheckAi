@@ -53,7 +53,6 @@ async function callBackendForAnalysis(type, data) {
         
         const result = await response.json();
         
-        // Die Logik zum Parsen der Antwort bleibt, da unser Backend die Google-Antwort durchreicht
         if (!result.candidates?.[0]?.content?.parts?.[0]) {
             throw new Error('Unerwartete API-Antwortstruktur vom Backend.');
         }
