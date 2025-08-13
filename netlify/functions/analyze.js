@@ -25,8 +25,7 @@ exports.handler = async function(event, context) {
 
     try {
         const requestData = JSON.parse(event.body);
-        // 'context' wurde in 'history' umbenannt, um die Konversation abzubilden
-        const { type, data, history } = requestData; 
+        const { type, data, history } = requestData; // 'history' für den Gesprächsverlauf
 
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
@@ -39,14 +38,13 @@ exports.handler = async function(event, context) {
         let requestPayload;
 
         if (type === 'FOLLOW_UP_QUESTION') {
-            // **NEUER, VERBESSERTER PROMPT FÜR FOLGEFRAGEN**
+            // **DEIN NEUER, VERBESSERTER PROMPT FÜR FOLGEFRAGEN**
             prompt = `Du bist ein KFZ-Meister in einem Chat. Du hast bereits eine Erstanalyse für ein Fahrzeug geliefert. Jetzt beantwortest du Folgefragen des Nutzers.
 
 **Deine Regeln:**
 1.  Antworte immer kurz, präzise, sachlich und wahrheitsgetreu.
 2.  Verwende **keine** Markdown-Formatierung (keine Sternchen, keine Listen, keine Aufzählungen). Formuliere deine Antwort in ganzen Sätzen als Fließtext.
-3.  **Priorität 1:** Versuche die Frage zuerst ausschließlich mit den Informationen aus der "Erstanalyse" zu beantworten, die Teil des Gesprächsverlaufs ist.
-4.  **Priorität 2:** Wenn die Erstanalyse die Frage nicht beantworten kann, gib an, dass du eine detaillierte Recherche durchführst (via Gemini) und präsentiere dann eine fundierte, faktenbasierte Antwort.
+3.  Führe eine detaillierte Recherche durch und präsentiere dann eine fundierte, faktenbasierte Antwort.
 5.  Behalte den gesamten Gesprächsverlauf im Auge, um auf vorherige Fragen und Antworten Bezug nehmen zu können.
 
 **Bisheriger Gesprächsverlauf:**
@@ -62,7 +60,7 @@ Gib deine Antwort als reinen, unformatierten Text zurück.`;
             };
 
         } else {
-            // Der Prompt für die Erstanalyse bleibt unverändert
+            // Der Prompt für die Erstanalyse bleibt unverändert, da er das strukturierte JSON erzeugen muss.
             const jsonFormat = `{
   "vehicle_title": "...", "advantages": ["..."], "disadvantages": ["..."], "price_evaluation": "...", "red_flags": ["..."], "model_specific_issues": ["..."], "equipment_summary": "..."
 }`;
@@ -71,10 +69,10 @@ Gib deine Antwort als reinen, unformatierten Text zurück.`;
 **Deine Aufgaben:**
 1.  **Fahrzeugtitel extrahieren:** Identifiziere und extrahiere den vollständigen Fahrzeugtitel (Marke, Modell, Ausstattung).
 2.  **Vor- und Nachteile:** Liste die wichtigsten Vor- und Nachteile auf.
-3.  **Preiseinschätzung:** Bewerte den Preis (fair, günstig, teuer, etc.) mit kurzer Begründung.
+3.  **Preiseinschätzung:** Bewerte den Preis (fair, günstig, teuer) mit kurzer Begründung.
 4.  **Rote Flaggen:** Identifiziere typische "rote Flaggen".
-5.  **Modellspezifische Probleme:** Erwähne bekannte Schwachstellen für dieses Modell und deren Reparaturkosten wenn man diese in einer Fachmännischen Werkstatt reparieren lässt.
-6.  **Ausstattung-Zusammenfassung:** Fasse die 3 - 5 wichtigsten Ausstattungsmerkmale zusammen.
+5.  **Modellspezifische Probleme:** Erwähne bekannte Schwachstellen für dieses Modell.
+6.  **Ausstattung-Zusammenfassung:** Fasse die 3-4 wichtigsten Ausstattungsmerkmale zusammen.
 
 **Antwortformat:**
 Gib deine Antwort NUR als JSON-Objekt zurück, ohne umschließende Markdown-Syntax. Das JSON-Objekt muss exakt folgendes Format haben:\n${jsonFormat}`;

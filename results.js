@@ -116,8 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const response = await chrome.runtime.sendMessage({
             type: 'FOLLOW_UP_QUESTION',
             data: question,
-            // KORRIGIERT: 'history' zu 'context' geändert, um zum Backend zu passen
-            context: conversationHistory 
+            history: conversationHistory 
         });
         
         hideTypingIndicator();
