@@ -46,7 +46,7 @@ exports.handler = async function(event, context) {
 1.  Antworte immer kurz, präzise, sachlich und wahrheitsgetreu.
 2.  Verwende **keine** Markdown-Formatierung (keine Sternchen, keine Listen, keine Aufzählungen). Formuliere deine Antwort in ganzen Sätzen als Fließtext.
 3.  **Priorität 1:** Versuche die Frage zuerst ausschließlich mit den Informationen aus der "Erstanalyse" zu beantworten, die Teil des Gesprächsverlaufs ist.
-4.  **Priorität 2:** Wenn die Erstanalyse die Frage nicht beantworten kann, gib an, dass du eine detaillierte Recherche durchführst und präsentiere dann eine fundierte, faktenbasierte Antwort.
+4.  **Priorität 2:** Wenn die Erstanalyse die Frage nicht beantworten kann, gib an, dass du eine detaillierte Recherche durchführst (via Gemini) und präsentiere dann eine fundierte, faktenbasierte Antwort.
 5.  Behalte den gesamten Gesprächsverlauf im Auge, um auf vorherige Fragen und Antworten Bezug nehmen zu können.
 
 **Bisheriger Gesprächsverlauf:**
