@@ -1,29 +1,41 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // Elemente der Hauptseite
-    const initialAnalysisContainer = document.getElementById('initial-analysis-container');
-    const openChatButton = document.getElementById('open-chat-button');
-    const copyButton = document.getElementById('copy-button');
+    // --- Globale Elemente ---
     const vehicleTitleElement = document.getElementById('vehicle-title');
-
-    // Elemente des Chat-Overlays
+    const initialAnalysisContainer = document.getElementById('initial-analysis-container');
+    const copyButton = document.getElementById('copy-button');
+    
+    // --- Chat-Elemente ---
+    const openChatButton = document.getElementById('open-chat-button');
     const chatOverlay = document.getElementById('chat-overlay');
     const closeChatButton = document.getElementById('close-chat-button');
     const chatMessagesContainer = document.getElementById('chat-messages-container');
     const questionInput = document.getElementById('question-input');
     const sendButton = document.getElementById('send-button');
 
+    // --- NEU: Kosten-Elemente ---
+    const openCostsButton = document.getElementById('open-costs-button');
+    const costsOverlay = document.getElementById('costs-overlay');
+    const closeCostsButton = document.getElementById('close-costs-button');
+    const costsFormContainer = document.getElementById('costs-form-container');
+    const costsResultContainer = document.getElementById('costs-result-container');
+    const calculateCostsButton = document.getElementById('calculate-costs-button');
+
+    // --- Globale Zustände ---
     let initialAnalysisData = null;
     let isWelcomeMessageShown = false;
 
     // --- 1. Laden der Erstanalyse ---
-    const { currentAnalysis } = await chrome.storage.local.get('currentAnalysis');
-
-    if (currentAnalysis && currentAnalysis.analysisData) {
-        initialAnalysisData = currentAnalysis.analysisData;
-        displayAnalysis(initialAnalysisData);
-        chrome.storage.local.remove('currentAnalysis');
-    } else {
-        displayError({ message: "Analyse konnte nicht geladen werden oder ist fehlerhaft." });
+    try {
+        const { currentAnalysis } = await chrome.storage.local.get('currentAnalysis');
+        if (currentAnalysis && currentAnalysis.analysisData) {
+            initialAnalysisData = currentAnalysis.analysisData;
+            displayAnalysis(initialAnalysisData);
+            chrome.storage.local.remove('currentAnalysis');
+        } else {
+            displayError({ message: "Analyse konnte nicht geladen werden oder ist fehlerhaft." });
+        }
+    } catch (e) {
+        displayError({ message: "Ein unerwarteter Fehler ist aufgetreten." });
     }
 
     function displayAnalysis(analysis) {
@@ -32,11 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        if (analysis.vehicle_title) {
-            vehicleTitleElement.textContent = analysis.vehicle_title;
-        } else {
-            vehicleTitleElement.textContent = "Unbekanntes Fahrzeug";
-        }
+        vehicleTitleElement.textContent = analysis.vehicle_title || "Unbekanntes Fahrzeug";
 
         const icons = {
             price: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
@@ -69,6 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         vehicleTitleElement.textContent = "Fehler";
         initialAnalysisContainer.innerHTML = `<div class="result-section error-section"><h4>Analyse fehlgeschlagen</h4><p>${error.message}</p></div>`;
         openChatButton.style.display = 'none';
+        openCostsButton.style.display = 'none';
     }
 
     // --- 2. Logik für das Chat-Overlay ---
@@ -76,9 +85,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatOverlay.classList.add('is-visible');
         if (!isWelcomeMessageShown) {
             isWelcomeMessageShown = true;
-            showTypingIndicator();
+            showTypingIndicator(chatMessagesContainer);
             setTimeout(() => {
-                hideTypingIndicator();
+                hideTypingIndicator(chatMessagesContainer);
                 appendMessage("Hallo! Ich bin dein digitaler KFZ-Meister. Wie kann ich dir weiterhelfen?", 'bot-message');
                 questionInput.focus();
             }, 1500);
@@ -87,9 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    closeChatButton.addEventListener('click', () => {
-        chatOverlay.classList.remove('is-visible');
-    });
+    closeChatButton.addEventListener('click', () => chatOverlay.classList.remove('is-visible'));
 
     // --- 3. Logik für Folgefragen ---
     async function handleSendQuestion() {
@@ -99,13 +106,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         appendMessage(question, 'user-message');
         questionInput.value = '';
         sendButton.disabled = true;
-        showTypingIndicator();
+        showTypingIndicator(chatMessagesContainer);
 
-        // Sammelt den gesamten bisherigen Chatverlauf
-        const conversationHistory = [
-            { role: "model", parts: [{ text: `Erstanalyse: ${JSON.stringify(initialAnalysisData)}` }] }
-        ];
-        
+        const conversationHistory = [{ role: "model", parts: [{ text: `Erstanalyse: ${JSON.stringify(initialAnalysisData)}` }] }];
         chatMessagesContainer.querySelectorAll('.message').forEach(msg => {
             if (!msg.classList.contains('typing-indicator')) {
                 const role = msg.classList.contains('user-message') ? 'user' : 'model';
@@ -113,14 +116,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        const response = await chrome.runtime.sendMessage({
-            type: 'FOLLOW_UP_QUESTION',
-            data: question,
-            history: conversationHistory 
-        });
+        const response = await chrome.runtime.sendMessage({ type: 'FOLLOW_UP_QUESTION', data: question, history: conversationHistory });
         
-        hideTypingIndicator();
-
+        hideTypingIndicator(chatMessagesContainer);
         if (response.error) {
             appendMessage(`Fehler: ${response.error.message}`, 'bot-message error');
         } else {
@@ -137,22 +135,92 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatMessagesContainer.appendChild(messageDiv);
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
+    
+    // --- 4. NEU: Logik für Kosten-Overlay ---
+    openCostsButton.addEventListener('click', () => {
+        costsOverlay.classList.add('is-visible');
+    });
 
-    // --- 4. Hilfsfunktionen für die "Schreibt..."-Animation ---
-    function showTypingIndicator() {
+    closeCostsButton.addEventListener('click', () => {
+        costsOverlay.classList.remove('is-visible');
+    });
+
+    calculateCostsButton.addEventListener('click', async () => {
+        const userInfo = {
+            age: document.getElementById('age-input').value,
+            sfClass: document.getElementById('sf-class-input').value,
+            insuranceType: document.getElementById('insurance-type-select').value,
+            location: document.getElementById('location-input').value,
+        };
+
+        // Einfache Validierung
+        if (!userInfo.age || !userInfo.sfClass || !userInfo.location) {
+            alert("Bitte fülle alle Felder aus.");
+            return;
+        }
+
+        costsFormContainer.style.display = 'none';
+        costsResultContainer.style.display = 'block';
+        costsResultContainer.innerHTML = ''; // Inhalt leeren
+        showTypingIndicator(costsResultContainer);
+
+        const response = await chrome.runtime.sendMessage({
+            type: 'CALCULATE_OWNERSHIP_COSTS',
+            vehicleInfo: initialAnalysisData,
+            userInfo: userInfo
+        });
+
+        hideTypingIndicator(costsResultContainer);
+
+        if (response.error) {
+            costsResultContainer.innerHTML = `<div class="result-section error-section"><h4>Berechnung fehlgeschlagen</h4><p>${response.error.message}</p></div>`;
+        } else {
+            displayCostResults(response.costs);
+        }
+    });
+
+    function displayCostResults(costs) {
+        const createCostSection = (title, costItem) => {
+            if (!costItem) return '';
+            return `
+                <div class="result-section costs-section">
+                    <h4>${title}</h4>
+                    <p><b>~ ${costItem.amount} € / Jahr</b></p>
+                    <p style="font-size: 13px; color: #64748b;">${costItem.details}</p>
+                </div>
+            `;
+        };
+
+        const costsHTML = `
+            ${createCostSection('KFZ-Steuer', costs.vehicle_tax)}
+            ${createCostSection('Versicherung', costs.insurance)}
+            ${createCostSection('Wartung & Reparaturen', costs.maintenance)}
+            ${createCostSection('Spritkosten', costs.fuel_costs)}
+            <div class="costs-summary">
+                <h3>Geschätzte Gesamtkosten</h3>
+                <p class="total-annual">${costs.total_annual_cost} € / Jahr</p>
+                <p class="total-monthly">oder ca. ${costs.total_monthly_cost} € / Monat</p>
+            </div>
+        `;
+        costsResultContainer.innerHTML = costsHTML;
+    }
+
+
+    // --- 5. Hilfsfunktionen für die "Schreibt..."-Animation ---
+    function showTypingIndicator(container) {
         const indicator = document.createElement('div');
         indicator.className = 'message bot-message typing-indicator';
         indicator.innerHTML = `<span></span><span></span><span></span>`;
-        chatMessagesContainer.appendChild(indicator);
-        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        container.appendChild(indicator);
+        container.scrollTop = container.scrollHeight;
     }
 
-    function hideTypingIndicator() {
-        const indicator = chatMessagesContainer.querySelector('.typing-indicator');
+    function hideTypingIndicator(container) {
+        const indicator = container.querySelector('.typing-indicator');
         if (indicator) indicator.remove();
     }
 
-    // --- 5. Event-Listener ---
+    // --- 6. Event-Listener ---
     sendButton.addEventListener('click', handleSendQuestion);
     questionInput.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') handleSendQuestion();

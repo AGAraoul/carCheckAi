@@ -45,7 +45,7 @@ body {
     flex-grow: 1;
     overflow-y: auto;
     padding: 24px;
-    min-height: 0; /* <-- WICHTIGER FIX: Verhindert das Überlaufen des Inhalts */
+    min-height: 0;
 }
 
 /* Analyse-Karten Design */
@@ -97,6 +97,7 @@ body {
 .disadvantages-section h4 { color: #d97706; }
 .redflags-section h4 { color: #dc2626; }
 .issues-section h4 { color: #581c87; }
+.costs-section h4 { color: #4f46e5; } /* NEU */
 .error-section h4 { color: #dc2626; }
 
 /* Aktionen unter der Analyse */
@@ -110,7 +111,7 @@ body {
     gap: 12px;
 }
 
-#open-chat-button, #copy-button {
+#open-chat-button, #copy-button, #open-costs-button {
     width: 100%;
     padding: 12px;
     border-radius: 8px;
@@ -124,13 +125,13 @@ body {
     gap: 8px;
 }
 
-#open-chat-button {
+#open-chat-button, #open-costs-button {
     background-color: #4f46e5;
     color: white;
     border: none;
 }
 
-#open-chat-button:hover {
+#open-chat-button:hover, #open-costs-button:hover {
     background-color: #4338ca;
 }
 
@@ -144,11 +145,11 @@ body {
     background-color: #e2e8f0;
 }
 
-#open-chat-button:active, #copy-button:active {
+#open-chat-button:active, #copy-button:active, #open-costs-button:active {
     transform: scale(0.98);
 }
 
-/* Chat Overlay für Folgefragen */
+/* Chat & Kosten Overlay */
 .chat-overlay {
     position: fixed;
     top: 0;
@@ -203,7 +204,7 @@ body {
     color: #1e293b;
 }
 
-#close-chat-button {
+#close-chat-button, #close-costs-button {
     background: none;
     border: none;
     font-size: 28px;
@@ -277,6 +278,107 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+/* NEUE STILE FÜR KOSTEN-MODAL */
+.costs-form-container, .costs-result-container {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.costs-result-container {
+    display: none; /* Wird per JS sichtbar gemacht */
+}
+
+.form-intro {
+    font-size: 15px;
+    color: #475569;
+    margin: 0 0 20px 0;
+    text-align: center;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+#calculate-costs-button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+#calculate-costs-button:hover {
+    background-color: #15803d;
+}
+
+.costs-result-container .result-section {
+    padding: 20px;
+}
+
+.costs-summary {
+    text-align: center;
+    padding: 20px;
+    background-color: #eef2ff;
+    border-radius: 12px;
+    margin-top: 24px;
+}
+
+.costs-summary h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    color: #4338ca;
+}
+
+.costs-summary .total-annual {
+    font-size: 28px;
+    font-weight: 700;
+    color: #3730a3;
+    margin: 0 0 4px 0;
+}
+
+.costs-summary .total-monthly {
+    font-size: 16px;
+    color: #4f46e5;
+    margin: 0;
+}
+
 
 /* Stile für die "Schreibt..."-Animation */
 .typing-indicator {

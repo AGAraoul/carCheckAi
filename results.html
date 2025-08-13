@@ -18,6 +18,10 @@
         </div>
 
         <div class="main-actions">
+            <button id="open-costs-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                Jährliche Unterhaltskosten
+            </button>
             <button id="open-chat-button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 Folgefrage stellen
@@ -44,6 +48,49 @@
             </div>
         </div>
     </div>
+    
+    <!-- NEU: Verstecktes Overlay für die Kostenberechnung -->
+    <div class="chat-overlay" id="costs-overlay">
+        <div class="chat-window" id="costs-window">
+            <div class="chat-header">
+                <h4>Unterhaltskosten berechnen</h4>
+                <button id="close-costs-button" title="Schließen">&times;</button>
+            </div>
+            <div class="costs-form-container" id="costs-form-container">
+                <p class="form-intro">Bitte gib deine Daten ein, um eine genauere Schätzung zu erhalten.</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="age-input">Dein Alter</label>
+                        <input type="number" id="age-input" placeholder="z.B. 28">
+                    </div>
+                    <div class="form-group">
+                        <label for="sf-class-input">SF-Klasse</label>
+                        <input type="text" id="sf-class-input" placeholder="z.B. SF10">
+                    </div>
+                    <div class="form-group">
+                        <label for="insurance-type-select">Versicherungsart</label>
+                        <select id="insurance-type-select">
+                            <option value="Vollkasko">Vollkasko</option>
+                            <option value="Teilkasko">Teilkasko</option>
+                            <option value="Haftpflicht">Haftpflicht</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-input">PLZ deines Wohnorts</label>
+                        <input type="text" id="location-input" placeholder="z.B. 10115">
+                    </div>
+                </div>
+                <button id="calculate-costs-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path><path d="M9 12l2 2 4-4"></path></svg>
+                    Berechnen
+                </button>
+            </div>
+            <div class="costs-result-container" id="costs-result-container">
+                <!-- Die berechneten Kosten werden hier eingefügt -->
+            </div>
+        </div>
+    </div>
+
 
     <script src="results.js"></script>
 </body>
