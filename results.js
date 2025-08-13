@@ -12,15 +12,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const questionInput = document.getElementById('question-input');
     const sendButton = document.getElementById('send-button');
 
-    let originalQueryContext = null;
+    let initialAnalysisData = null;
     let isWelcomeMessageShown = false;
 
     // --- 1. Laden der Erstanalyse ---
     const { currentAnalysis } = await chrome.storage.local.get('currentAnalysis');
 
     if (currentAnalysis && currentAnalysis.analysisData) {
-        originalQueryContext = currentAnalysis.originalQuery;
-        displayAnalysis(currentAnalysis.analysisData);
+        initialAnalysisData = currentAnalysis.analysisData;
+        displayAnalysis(initialAnalysisData);
         chrome.storage.local.remove('currentAnalysis');
     } else {
         displayError({ message: "Analyse konnte nicht geladen werden oder ist fehlerhaft." });
@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Setzt den Fahrzeugtitel im Header
         if (analysis.vehicle_title) {
             vehicleTitleElement.textContent = analysis.vehicle_title;
         } else {
@@ -72,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         openChatButton.style.display = 'none';
     }
 
-    // ... (der Rest deiner results.js-Datei bleibt unverändert) ...
+    // --- 2. Logik für das Chat-Overlay ---
     openChatButton.addEventListener('click', () => {
         chatOverlay.classList.add('is-visible');
         if (!isWelcomeMessageShown) {
@@ -92,18 +91,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatOverlay.classList.remove('is-visible');
     });
 
+    // --- 3. Logik für Folgefragen ---
     async function handleSendQuestion() {
         const question = questionInput.value.trim();
-        if (!question || !originalQueryContext) return;
+        if (!question || !initialAnalysisData) return;
+
         appendMessage(question, 'user-message');
         questionInput.value = '';
         sendButton.disabled = true;
         showTypingIndicator();
+
+        // Sammelt den gesamten bisherigen Chatverlauf
+        const conversationHistory = [
+            { role: "model", parts: [{ text: `Erstanalyse: ${JSON.stringify(initialAnalysisData)}` }] }
+        ];
+        
+        chatMessagesContainer.querySelectorAll('.message').forEach(msg => {
+            if (!msg.classList.contains('typing-indicator')) {
+                const role = msg.classList.contains('user-message') ? 'user' : 'model';
+                conversationHistory.push({ role: role, parts: [{ text: msg.innerText }] });
+            }
+        });
+
         const response = await chrome.runtime.sendMessage({
             type: 'FOLLOW_UP_QUESTION',
-            data: { question, context: originalQueryContext }
+            data: question, // 'data' ist jetzt nur die neue Frage
+            history: conversationHistory // 'history' enthält den gesamten Verlauf
         });
+        
         hideTypingIndicator();
+
         if (response.error) {
             appendMessage(`Fehler: ${response.error.message}`, 'bot-message error');
         } else {
@@ -121,6 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
 
+    // --- 4. Hilfsfunktionen für die "Schreibt..."-Animation ---
     function showTypingIndicator() {
         const indicator = document.createElement('div');
         indicator.className = 'message bot-message typing-indicator';
@@ -134,6 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (indicator) indicator.remove();
     }
 
+    // --- 5. Event-Listener ---
     sendButton.addEventListener('click', handleSendQuestion);
     questionInput.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') handleSendQuestion();
