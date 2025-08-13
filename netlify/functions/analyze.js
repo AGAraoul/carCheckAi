@@ -39,7 +39,7 @@ exports.handler = async function(event, context) {
 
         if (type === 'FOLLOW_UP_QUESTION') {
             // Prompt für Folgefragen
-            prompt = `Du bist ein KFZ-Meister. Beantworte die folgende Frage des Nutzers kurz und präzise. Berücksichtige dabei den Kontext der vorherigen Analyse.
+            prompt = `Du bist ein KFZ-Meister. Beantworte die folgende Frage des Nutzers kurz und präzise. Berücksichtige dabei den Kontext der vorherigen Analyse, sollten aber keine genauen Informationen in der Analyse vorliegen, recherchiere via Gemini im Internet nach Informationen.
             
             **Bisheriger Kontext:**
             ${JSON.stringify(context, null, 2)}
