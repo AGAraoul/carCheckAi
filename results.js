@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sendButton = document.getElementById('send-button');
 
     let originalQueryContext = null;
+    let isWelcomeMessageShown = false;
 
     // --- 1. Laden der Erstanalyse ---
     const { currentAnalysis } = await chrome.storage.local.get('currentAnalysis');
@@ -65,7 +66,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- 2. Logik für das Chat-Overlay ---
     openChatButton.addEventListener('click', () => {
         chatOverlay.classList.add('is-visible');
-        questionInput.focus();
+        
+        // Zeigt die Willkommensnachricht nur beim ersten Öffnen an
+        if (!isWelcomeMessageShown) {
+            isWelcomeMessageShown = true;
+            showTypingIndicator();
+            setTimeout(() => {
+                hideTypingIndicator();
+                appendMessage("Hallo! Ich bin dein digitaler KFZ-Meister. Wie kann ich dir weiterhelfen?", 'bot-message');
+                questionInput.focus();
+            }, 1500);
+        } else {
+            questionInput.focus();
+        }
     });
 
     closeChatButton.addEventListener('click', () => {
@@ -80,11 +93,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         appendMessage(question, 'user-message');
         questionInput.value = '';
         sendButton.disabled = true;
+        showTypingIndicator();
 
         const response = await chrome.runtime.sendMessage({
             type: 'FOLLOW_UP_QUESTION',
             data: { question, context: originalQueryContext }
         });
+        
+        hideTypingIndicator();
 
         if (response.error) {
             appendMessage(`Fehler: ${response.error.message}`, 'bot-message error');
@@ -103,12 +119,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
 
+    // --- 4. Hilfsfunktionen für die "Schreibt..."-Animation ---
+    function showTypingIndicator() {
+        const indicator = document.createElement('div');
+        indicator.className = 'message bot-message typing-indicator';
+        indicator.innerHTML = `<span></span><span></span><span></span>`;
+        chatMessagesContainer.appendChild(indicator);
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+        const indicator = chatMessagesContainer.querySelector('.typing-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
+    // --- 5. Event-Listener ---
     sendButton.addEventListener('click', handleSendQuestion);
     questionInput.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') handleSendQuestion();
     });
 
-    // --- 4. Logik für den Kopieren-Button ---
     copyButton.addEventListener('click', () => {
         let textToCopy = initialAnalysisContainer.innerText;
         const chatText = chatMessagesContainer.innerText;
