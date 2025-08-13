@@ -104,7 +104,7 @@ Führe die Analyse jetzt durch und gib das Ergebnis als valides JSON zurück.`;
 }`;
             const basePrompt = `Du bist ein extrem erfahrener und kritischer KFZ-Meister. Analysiere die folgenden Fahrzeuginformationen sehr detailliert.
 **Deine Aufgaben:**
-1.  **Fahrzeugtitel extrahieren:** Identifiziere und extrahiere den vollständigen Fahrzeugtitel (Marke, Modell, Ausstattung).
+1.  **Fahrzeugtitel extrahieren:** Identifiziere und extrahiere den vollständigen Fahrzeugtitel (Marke, Modell, Ausstattung, Erstzulassung).
 2.  **Vor- und Nachteile:** Liste die wichtigsten Vor- und Nachteile auf.
 3.  **Preiseinschätzung:** Bewerte den Preis (fair, günstig, teuer, sowie nenne diesen ebenfalls in der Analyse) mit ganz kurzer Begründung (Für diesen Punkt maximal 3 Sätze).
 4.  **Rote Flaggen:** Identifiziere typische "rote Flaggen".
