@@ -41,7 +41,7 @@ exports.handler = async function(event, context) {
             prompt = `Du bist ein KFZ-Meister in einem Chat. Du hast bereits eine Erstanalyse für ein Fahrzeug geliefert. Jetzt beantwortest du Folgefragen des Nutzers.
 **Deine Regeln:**
 1. Antworte immer kurz, präzise, sachlich und wahrheitsgetreu.
-2. Verwende **keine** Markdown-Formatierung (keine Sternchen, Listen etc.). Formuliere deine Antwort in ganzen Sätzen als Fließtext.
+2. Verwende **keine** Markdown-Formatierung (keine Sternchen, Stichpunkte sind erlaubt wenn diese übersichtlicher sind als Fließtext). Formuliere deine Antwort in ganzen Sätzen als Fließtext.
 3. Nutze dein umfangreiches Wissen und den gesamten Gesprächsverlauf, um die bestmögliche Antwort zu geben.
 **Bisheriger Gesprächsverlauf:**
 ${JSON.stringify(history, null, 2)}
@@ -69,7 +69,7 @@ Gib deine Antwort als reinen, unformatierten Text zurück.`;
 1.  **Recherchiere sorgfältig:** Nutze dein internes Wissen, um genaue Werte zu ermitteln.
 2.  **Sei spezifisch:** Beziehe dich exakt auf das angegebene Fahrzeug und die Nutzerdaten.
 3.  **Begründe deine Schätzungen:** Gib zu jedem Kostenpunkt eine kurze, klare Erklärung.
-4.  **Antwortformat:** Gib deine Antwort NUR als JSON-Objekt zurück, ohne umschließende Markdown-Syntax. Das JSON-Objekt muss exakt folgendes Format haben:
+4.  **Antwortformat:** Gib deine Antwort NUR als JSON-Objekt zurück, ohne umschließende Markdown-Syntax (Stichpunkte sind erlaubt, wenn diese übersichtlicher sind). Das JSON-Objekt muss exakt folgendes Format haben:
 ${costsJsonFormat}
 
 **Fahrzeuginformationen:**
@@ -110,7 +110,7 @@ Führe die Analyse jetzt durch und gib das Ergebnis als valides JSON zurück.`;
 4.  **Rote Flaggen:** Identifiziere typische "rote Flaggen".
 5.  **Modellspezifische Probleme:** Erwähne bekannte Schwachstellen für dieses Modell.
 6.  **Ausstattung-Zusammenfassung:** Fasse die 3-4 wichtigsten Ausstattungsmerkmale zusammen.
-7.  **Verwende **keine** Markdown-Formatierung (keine Sternchen, Listen etc.).
+7.  **Verwende **keine** Markdown-Formatierung (keine Sternchen).
 **Antwortformat:**
 Gib deine Antwort NUR als JSON-Objekt zurück, ohne umschließende Markdown-Syntax. Das JSON-Objekt muss exakt folgendes Format haben:\n${jsonFormat}`;
 
