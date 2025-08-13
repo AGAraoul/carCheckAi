@@ -1,18 +1,24 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const chatContainer = document.getElementById('chat-container');
+    // Elemente der Hauptseite
+    const initialAnalysisContainer = document.getElementById('initial-analysis-container');
+    const openChatButton = document.getElementById('open-chat-button');
+    const copyButton = document.getElementById('copy-button');
+
+    // Elemente des Chat-Overlays
+    const chatOverlay = document.getElementById('chat-overlay');
+    const closeChatButton = document.getElementById('close-chat-button');
+    const chatMessagesContainer = document.getElementById('chat-messages-container');
     const questionInput = document.getElementById('question-input');
     const sendButton = document.getElementById('send-button');
-    const copyButton = document.getElementById('copy-button');
 
     let originalQueryContext = null;
 
-    // Lade die aktuelle Analyse direkt
+    // --- 1. Laden der Erstanalyse ---
     const { currentAnalysis } = await chrome.storage.local.get('currentAnalysis');
 
     if (currentAnalysis && currentAnalysis.analysisData) {
         originalQueryContext = currentAnalysis.originalQuery;
         displayAnalysis(currentAnalysis.analysisData);
-        // Lösche die Analyse aus dem Speicher, nachdem sie geladen wurde
         chrome.storage.local.remove('currentAnalysis');
     } else {
         displayError({ message: "Analyse konnte nicht geladen werden oder ist fehlerhaft." });
@@ -34,14 +40,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const createSection = (title, content, className, icon) => {
-            if (!content || (Array.isArray(content) && content.length === 0)) {
-                return ''; // Leere Sektionen nicht anzeigen
-            }
-            if (Array.isArray(content)) {
-                const itemsHTML = content.map(item => `<li>${item}</li>`).join('');
-                return `<div class="result-section ${className}"><h4>${icon}${title}</h4><ul>${itemsHTML}</ul></div>`;
-            }
-            return `<div class="result-section ${className}"><h4>${icon}${title}</h4><p>${content}</p></div>`;
+            if (!content || (Array.isArray(content) && content.length === 0)) return '';
+            const itemsHTML = Array.isArray(content) ? `<ul>${content.map(item => `<li>${item}</li>`).join('')}</ul>` : `<p>${content}</p>`;
+            return `<div class="result-section ${className}"><h4>${icon}${title}</h4>${itemsHTML}</div>`;
         };
 
         const analysisHTML = `
@@ -53,18 +54,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             ${createSection('Bekannte Modell-Probleme', analysis.model_specific_issues, 'issues-section', icons.issues)}
         `;
         
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message bot-message';
-        messageDiv.innerHTML = analysisHTML;
-        chatContainer.appendChild(messageDiv);
+        initialAnalysisContainer.innerHTML = analysisHTML;
     }
 
     function displayError(error) {
-        chatContainer.innerHTML = `<div class="message bot-message error-section"><h4>Fehler</h4><p>${error.message}</p></div>`;
-        questionInput.disabled = true;
-        sendButton.disabled = true;
+        initialAnalysisContainer.innerHTML = `<div class="result-section error-section"><h4>Fehler</h4><p>${error.message}</p></div>`;
+        openChatButton.style.display = 'none';
     }
 
+    // --- 2. Logik für das Chat-Overlay ---
+    openChatButton.addEventListener('click', () => {
+        chatOverlay.classList.add('is-visible');
+        questionInput.focus();
+    });
+
+    closeChatButton.addEventListener('click', () => {
+        chatOverlay.classList.remove('is-visible');
+    });
+
+    // --- 3. Logik für Folgefragen ---
     async function handleSendQuestion() {
         const question = questionInput.value.trim();
         if (!question || !originalQueryContext) return;
@@ -90,26 +98,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     function appendMessage(text, className) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${className}`;
-        // Wandelt Zeilenumbrüche in <br>-Tags um, für eine bessere Formatierung der KI-Antwort
         messageDiv.innerHTML = text.replace(/\n/g, '<br>');
-        chatContainer.appendChild(messageDiv);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        chatMessagesContainer.appendChild(messageDiv);
+        chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
 
+    sendButton.addEventListener('click', handleSendQuestion);
+    questionInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') handleSendQuestion();
+    });
+
+    // --- 4. Logik für den Kopieren-Button ---
     copyButton.addEventListener('click', () => {
-        // Sammelt den Text aus allen Nachrichten im Chat-Container
-        const textToCopy = Array.from(chatContainer.querySelectorAll('.message'))
-                                .map(el => el.innerText)
-                                .join('\n\n---\n\n');
+        let textToCopy = initialAnalysisContainer.innerText;
+        const chatText = chatMessagesContainer.innerText;
+
+        if (chatText) {
+            textToCopy += '\n\n--- Folgefragen ---\n' + chatText;
+        }
                                 
         navigator.clipboard.writeText(textToCopy).then(() => {
             copyButton.textContent = 'Kopiert!';
             setTimeout(() => { copyButton.textContent = 'Gesamte Analyse kopieren'; }, 2000);
         });
-    });
-
-    sendButton.addEventListener('click', handleSendQuestion);
-    questionInput.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') handleSendQuestion();
     });
 });

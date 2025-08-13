@@ -6,25 +6,44 @@
     <link rel="stylesheet" href="results.css">
 </head>
 <body>
+    <!-- Hauptcontainer für die Erstanalyse -->
     <div class="container">
         <div class="header">
             <h3>KI-Fahrzeugbewertung</h3>
         </div>
         
-        <div class="chat-container" id="chat-container">
-            <!-- Analyse und Chat werden hier per JavaScript eingefügt -->
+        <div class="analysis-container" id="initial-analysis-container">
+            <!-- Die Erstanalyse wird hier per JavaScript eingefügt -->
         </div>
 
-        <div class="footer-actions">
-            <div class="input-container">
-                <input type="text" id="question-input" placeholder="Stelle eine Folgefrage...">
+        <div class="main-actions">
+            <button id="open-chat-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                Folgefrage stellen
+            </button>
+            <button id="copy-button">Gesamte Analyse kopieren</button>
+        </div>
+    </div>
+
+    <!-- Verstecktes Overlay für den Chat mit Folgefragen -->
+    <div class="chat-overlay" id="chat-overlay">
+        <div class="chat-window" id="chat-window">
+            <div class="chat-header">
+                <h4>Chat mit dem KFZ-Meister</h4>
+                <button id="close-chat-button" title="Schließen">&times;</button>
+            </div>
+            <div class="chat-messages" id="chat-messages-container">
+                <!-- Nachrichten der Folgefragen werden hier eingefügt -->
+            </div>
+            <div class="chat-input-container">
+                <input type="text" id="question-input" placeholder="Deine Frage...">
                 <button id="send-button" title="Senden">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
             </div>
-            <button id="copy-button">Gesamte Analyse kopieren</button>
         </div>
     </div>
+
     <script src="results.js"></script>
 </body>
 </html>
