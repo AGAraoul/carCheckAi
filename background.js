@@ -1,4 +1,4 @@
-// --- Initialisierung: Kontextmenü erstellen ---
+// --- Initialisierung & Kontextmenü ---
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "analyze-selected-text",
@@ -21,7 +21,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
     if (request.type === 'FOLLOW_UP_QUESTION') {
-        callBackendForFollowUp(request.data).then(response => {
+        // **KORRIGIERT:** Leitet jetzt das gesamte 'request'-Objekt weiter
+        callBackendForFollowUp(request).then(response => {
             sendResponse(response);
         });
         return true;
@@ -33,34 +34,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Behandelt die Erstanalyse
 async function handleAnalysisRequest(type, data, sendResponse) {
     let loadingWindow;
-    if (!sendResponse) { // Nur für Kontextmenü ein Ladefenster öffnen
+    if (!sendResponse) {
         loadingWindow = await chrome.windows.create({ url: 'loading.html', type: 'popup', width: 800, height: 650 });
     }
-
     const analysis = await callBackendForAnalysis(type, data);
-
-    // Speichert die aktuelle Analyse und die Originalanfrage für Folgefragen
-    const currentAnalysis = {
-        analysisData: analysis,
-        originalQuery: { type, data }
-    };
+    const currentAnalysis = { analysisData: analysis };
     await chrome.storage.local.set({ currentAnalysis });
     
-    if (sendResponse) { // Antwort an Popup senden
+    if (sendResponse) {
         sendResponse({ analysis });
-    } else { // Ladefenster weiterleiten
+    } else {
         await chrome.tabs.update(loadingWindow.tabs[0].id, { url: 'results.html' });
     }
 }
 
 // Ruft das Backend für eine Folgefrage auf
-async function callBackendForFollowUp(data) {
+async function callBackendForFollowUp(request) {
     const backendUrl = 'https://carcheckai.netlify.app/.netlify/functions/analyze';
     try {
         const response = await fetch(backendUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'FOLLOW_UP_QUESTION', data: data.question, context: data.context })
+            // **KORRIGIERT:** Baut den Request Body korrekt mit 'history' zusammen
+            body: JSON.stringify({ 
+                type: 'FOLLOW_UP_QUESTION', 
+                data: request.data, 
+                history: request.history 
+            })
         });
         if (!response.ok) throw new Error(`Backend-Fehler ${response.status}`);
         const result = await response.json();

@@ -38,14 +38,14 @@ exports.handler = async function(event, context) {
         let requestPayload;
 
         if (type === 'FOLLOW_UP_QUESTION') {
-            // **DEIN NEUER, VERBESSERTER PROMPT FÜR FOLGEFRAGEN**
+            // **NEUER, VEREINFACHTER PROMPT FÜR FOLGEFRAGEN**
             prompt = `Du bist ein KFZ-Meister in einem Chat. Du hast bereits eine Erstanalyse für ein Fahrzeug geliefert. Jetzt beantwortest du Folgefragen des Nutzers.
 
 **Deine Regeln:**
 1.  Antworte immer kurz, präzise, sachlich und wahrheitsgetreu.
-2.  Verwende **keine** Markdown-Formatierung (keine Sternchen, keine Listen, keine Aufzählungen). Formuliere deine Antwort in ganzen Sätzen als Fließtext.
-3.  Führe eine detaillierte Recherche durch und präsentiere dann eine fundierte, faktenbasierte Antwort.
-5.  Behalte den gesamten Gesprächsverlauf im Auge, um auf vorherige Fragen und Antworten Bezug nehmen zu können.
+2.  Verwende **keine** Markdown-Formatierung (keine Sternchen, Listen etc.). Formuliere deine Antwort in ganzen Sätzen als Fließtext.
+3.  Nutze dein umfangreiches Wissen und den gesamten Gesprächsverlauf, um die bestmögliche Antwort zu geben. Handle eigenständig und recherchiere, wenn nötig.
+4.  Behalte den gesamten Gesprächsverlauf im Auge, um auf vorherige Fragen und Antworten Bezug nehmen zu können.
 
 **Bisheriger Gesprächsverlauf:**
 ${JSON.stringify(history, null, 2)}
@@ -60,7 +60,7 @@ Gib deine Antwort als reinen, unformatierten Text zurück.`;
             };
 
         } else {
-            // Der Prompt für die Erstanalyse bleibt unverändert, da er das strukturierte JSON erzeugen muss.
+            // Der Prompt für die Erstanalyse bleibt unverändert
             const jsonFormat = `{
   "vehicle_title": "...", "advantages": ["..."], "disadvantages": ["..."], "price_evaluation": "...", "red_flags": ["..."], "model_specific_issues": ["..."], "equipment_summary": "..."
 }`;
