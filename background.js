@@ -1,4 +1,4 @@
-// --- Initialisierung & Kontextmenü ---
+// --- Initialisierung: Kontextmenü erstellen ---
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "analyze-selected-text",
@@ -10,14 +10,14 @@ chrome.runtime.onInstalled.addListener(() => {
 // --- Listener für das Kontextmenü ---
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === "analyze-selected-text" && info.selectionText) {
-        handleAnalysisRequest('ANALYZE_TEXT', info.selectionText, tab.url);
+        handleAnalysisRequest('ANALYZE_TEXT', info.selectionText);
     }
 });
 
 // --- Listener für Nachrichten vom Popup ---
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'ANALYZE_SCREENSHOT') {
-        handleAnalysisRequest('ANALYZE_SCREENSHOT', request.data, sender.tab.url, sendResponse);
+        handleAnalysisRequest('ANALYZE_SCREENSHOT', request.data, sendResponse);
         return true;
     }
     if (request.type === 'FOLLOW_UP_QUESTION') {
@@ -30,8 +30,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // --- Hauptfunktionen ---
 
-// Behandelt die Erstanalyse und speichert sie im Verlauf
-async function handleAnalysisRequest(type, data, url, sendResponse) {
+// Behandelt die Erstanalyse
+async function handleAnalysisRequest(type, data, sendResponse) {
     let loadingWindow;
     if (!sendResponse) { // Nur für Kontextmenü ein Ladefenster öffnen
         loadingWindow = await chrome.windows.create({ url: 'loading.html', type: 'popup', width: 800, height: 650 });
@@ -39,34 +39,18 @@ async function handleAnalysisRequest(type, data, url, sendResponse) {
 
     const analysis = await callBackendForAnalysis(type, data);
 
-    if (analysis && !analysis.error) {
-        const historyEntry = {
-            id: Date.now(),
-            title: analysis.price_evaluation || "Unbekanntes Fahrzeug", // Vereinfachter Titel
-            url: url,
-            date: new Date().toISOString(),
-            analysisData: analysis,
-            originalQuery: { type, data } // Speichert die Originalanfrage für Folgefragen
-        };
-        await saveToHistory(historyEntry);
-        await chrome.storage.local.set({ currentAnalysisId: historyEntry.id });
-    } else {
-        // Bei Fehler trotzdem ein Ergebnisobjekt speichern, damit die Ergebnisseite es anzeigen kann
-        await chrome.storage.local.set({ currentAnalysis: { analysisData: analysis } });
-    }
+    // Speichert die aktuelle Analyse und die Originalanfrage für Folgefragen
+    const currentAnalysis = {
+        analysisData: analysis,
+        originalQuery: { type, data }
+    };
+    await chrome.storage.local.set({ currentAnalysis });
     
     if (sendResponse) { // Antwort an Popup senden
         sendResponse({ analysis });
     } else { // Ladefenster weiterleiten
         await chrome.tabs.update(loadingWindow.tabs[0].id, { url: 'results.html' });
     }
-}
-
-// Speichert einen neuen Eintrag im Verlauf
-async function saveToHistory(entry) {
-    const result = await chrome.storage.local.get({ history: [] });
-    const newHistory = [entry, ...result.history].slice(0, 50); // Limitiert auf 50 Einträge
-    await chrome.storage.local.set({ history: newHistory });
 }
 
 // Ruft das Backend für eine Folgefrage auf
@@ -87,7 +71,6 @@ async function callBackendForFollowUp(data) {
     }
 }
 
-
 // Ruft das Backend für die Erstanalyse auf
 async function callBackendForAnalysis(type, data) {
     const backendUrl = 'https://carcheckai.netlify.app/.netlify/functions/analyze';
@@ -97,7 +80,10 @@ async function callBackendForAnalysis(type, data) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ type, data })
         });
-        if (!response.ok) throw new Error(`Backend-Fehler ${response.status}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error.message || `Backend-Fehler ${response.status}`);
+        }
         const result = await response.json();
         const analysisText = result.candidates[0].content.parts[0].text;
         return JSON.parse(analysisText);
