@@ -84,7 +84,7 @@ ${costsJsonFormat}
 - Standort (PLZ): ${userInfo.location}
 
 **Deine Aufgaben im Detail:**
-1.  **KFZ-Steuer:** Berechne die genaue jährliche KFZ-Steuer basierend auf den Fahrzeugdaten (Hubraum, CO2-Werte, Erstzulassung). Gib die Berechnungsgrundlage in den Details an.
+1.  **KFZ-Steuer:** Berechne die genaue jährliche KFZ-Steuer basierend auf den Fahrzeugdaten des analysierten Fahrzeugs (Hubraum, CO2-Werte, Erstzulassung). Gib die Berechnungsgrundlage in den Details an.
 2.  **Versicherung:** Schätze die jährlichen Versicherungskosten basierend auf dem Fahrzeugmodell (Typschlüssel), dem Alter des Fahrers, der SF-Klasse, dem Versicherungstyp und dem Standort. Gib die Annahmen in den Details an.
 3.  **Wartung:** Schätze die durchschnittlichen jährlichen Wartungskosten. Berücksichtige typische Inspektionskosten und erwähne eventuell bald anstehende, teure Reparaturen (z.B. Zahnriemenwechsel, basierend auf typischen Intervallen für dieses Modell).
 4.  **Spritkosten:** Recherchiere den aktuellen Durchschnitts-Spritpreis für die angegebene PLZ (oder nutze einen realistischen bundesweiten Durchschnitt, falls die lokale Suche nicht möglich ist). Berechne die jährlichen Spritkosten basierend auf dem von dir recherchierten Durchschnittsverbrauch des Fahrzeugs bei einer Fahrleistung von 15.000 km/Jahr. Gib den angenommenen Verbrauch, den Spritpreis und die Fahrleistung in den Details an.
