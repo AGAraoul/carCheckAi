@@ -69,7 +69,7 @@ Gib deine Antwort als reinen, unformatierten Text zurück.`;
 **Deine Aufgaben:**
 1.  **Fahrzeugtitel extrahieren:** Identifiziere und extrahiere den vollständigen Fahrzeugtitel (Marke, Modell, Ausstattung).
 2.  **Vor- und Nachteile:** Liste die wichtigsten Vor- und Nachteile auf.
-3.  **Preiseinschätzung:** Bewerte den Preis (fair, günstig, teuer) mit kurzer Begründung.
+3.  **Preiseinschätzung:** Bewerte den Preis (fair, günstig, teuer, sowie nenne diesen ebenfalls in der Analyse) mit kurzer Begründung.
 4.  **Rote Flaggen:** Identifiziere typische "rote Flaggen".
 5.  **Modellspezifische Probleme:** Erwähne bekannte Schwachstellen für dieses Modell.
 6.  **Ausstattung-Zusammenfassung:** Fasse die 3-4 wichtigsten Ausstattungsmerkmale zusammen.
