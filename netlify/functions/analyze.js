@@ -1,7 +1,7 @@
 // Diese Funktion läuft auf dem Netlify-Server und agiert als sicherer Proxy.
 
 exports.handler = async function(event, context) {
-    // CORS Preflight-Anfrage für die OPTIONS-Methode behandeln.
+    // CORS Preflight-Anfrage
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 200,
@@ -25,7 +25,7 @@ exports.handler = async function(event, context) {
 
     try {
         const requestData = JSON.parse(event.body);
-        const { type, data } = requestData;
+        const { type, data, context } = requestData; // 'context' für Folgefragen
 
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
@@ -35,17 +35,30 @@ exports.handler = async function(event, context) {
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
         
         let prompt;
-        
-        const jsonFormat = `{
-  "advantages": ["Stichpunkt 1", "Stichpunkt 2"],
-  "disadvantages": ["Stichpunkt 1", "Stichpunkt 2"],
-  "price_evaluation": "Deine Einschätzung hier als kurzer Satz.",
-  "red_flags": ["Gefundene rote Flagge 1"],
-  "model_specific_issues": ["Bekanntes Problem 1"],
-  "equipment_summary": "Zusammenfassung der Top-Ausstattung."
-}`;
+        let requestPayload;
 
-        const basePrompt = `Du bist ein extrem erfahrener und kritischer KFZ-Meister. Analysiere die folgenden Fahrzeuginformationen sehr detailliert.
+        if (type === 'FOLLOW_UP_QUESTION') {
+            // Prompt für Folgefragen
+            prompt = `Du bist ein KFZ-Meister. Beantworte die folgende Frage des Nutzers kurz und präzise. Berücksichtige dabei den Kontext der vorherigen Analyse.
+            
+            **Bisheriger Kontext:**
+            ${JSON.stringify(context, null, 2)}
+
+            **Neue Frage des Nutzers:**
+            "${data}"
+            
+            Gib deine Antwort als einfachen Text zurück.`;
+            
+            requestPayload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+
+        } else {
+            // Bisheriger Prompt für die Erstanalyse
+            const jsonFormat = `{
+  "advantages": ["..."], "disadvantages": ["..."], "price_evaluation": "...", "red_flags": ["..."], "model_specific_issues": ["..."], "equipment_summary": "..."
+}`;
+            const basePrompt = `Du bist ein extrem erfahrener und kritischer KFZ-Meister. Analysiere die folgenden Fahrzeuginformationen sehr detailliert.
 
 **Deine Aufgaben:**
 1.  **Vor- und Nachteile:** Liste die wichtigsten Vor- und Nachteile auf, die einen direkten Einfluss auf Wert oder Zuverlässigkeit haben.
@@ -58,23 +71,23 @@ exports.handler = async function(event, context) {
 Gib deine Antwort NUR als JSON-Objekt zurück, ohne umschließende Markdown-Syntax. Das JSON-Objekt muss exakt folgendes Format haben:
 ${jsonFormat}`;
 
+            if (type === 'ANALYZE_TEXT') {
+                prompt = `${basePrompt}\n\n**Analysiere diesen Text:** "${data}"`;
+            } else if (type === 'ANALYZE_SCREENSHOT') {
+                prompt = `${basePrompt}\n\n**Analysiere diesen Screenshot:**`;
+            } else {
+                throw new Error("Ungültiger Analyse-Typ.");
+            }
 
-        if (type === 'ANALYZE_TEXT') {
-            prompt = `${basePrompt}\n\n**Analysiere diesen Text:** "${data}"`;
-        } else if (type === 'ANALYZE_SCREENSHOT') {
-            prompt = `${basePrompt}\n\n**Analysiere diesen Screenshot:**`;
-        } else {
-            throw new Error("Ungültiger Analyse-Typ.");
+            requestPayload = {
+                contents: [{ 
+                    parts: type === 'ANALYZE_TEXT'
+                        ? [{ text: prompt }]
+                        : [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: data.split(',')[1] } }]
+                }],
+                generationConfig: { responseMimeType: "application/json" }
+            };
         }
-
-        const requestPayload = {
-            contents: [{ 
-                parts: type === 'ANALYZE_TEXT'
-                    ? [{ text: prompt }]
-                    : [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: data.split(',')[1] } }]
-            }],
-            generationConfig: { responseMimeType: "application/json" }
-        };
 
         const apiResponse = await fetch(apiUrl, {
             method: 'POST',

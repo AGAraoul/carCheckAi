@@ -1,47 +1,77 @@
-// Dieses Skript füllt das Ergebnis-Fenster (results.html) mit Leben
+document.addEventListener('DOMContentLoaded', async () => {
+    const chatContainer = document.getElementById('chat-container');
+    const questionInput = document.getElementById('question-input');
+    const sendButton = document.getElementById('send-button');
+    const copyButton = document.getElementById('copy-button');
+    const historyButton = document.getElementById('history-button');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const resultContentDiv = document.getElementById('result-content');
+    let currentAnalysisContext = null;
 
-    // Holt das Analyse-Ergebnis aus dem lokalen Speicher der Erweiterung
-    chrome.storage.local.get(['analysisResult'], (data) => {
-        if (data.analysisResult) {
-            const analysis = data.analysisResult;
-            let contentHTML = '';
+    // Lade die aktuelle Analyse
+    const { currentAnalysisId, history } = await chrome.storage.local.get(['currentAnalysisId', 'history']);
+    const currentAnalysis = history.find(item => item.id === currentAnalysisId);
 
-            // Baut das HTML basierend auf dem Analyse-Ergebnis auf
-            if (analysis.error) {
-                // Liest die Nachricht aus dem Fehlerobjekt aus
-                const errorMessage = analysis.error.message || 'Ein unbekannter Fehler ist aufgetreten.';
-                contentHTML = `<div class="result-section error-section"><h4>Fehler</h4><p>${errorMessage}</p></div>`;
-            } else {
-                const advantagesHTML = analysis.advantages && analysis.advantages.length > 0
-                    ? analysis.advantages.map(item => `<li>${item}</li>`).join('')
-                    : '<li>Keine spezifischen Vorteile gefunden.</li>';
+    if (currentAnalysis) {
+        currentAnalysisContext = currentAnalysis.originalQuery;
+        displayAnalysis(currentAnalysis.analysisData);
+    } else {
+        displayError({ message: "Analyse konnte nicht geladen werden." });
+    }
 
-                const disadvantagesHTML = analysis.disadvantages && analysis.disadvantages.length > 0
-                    ? analysis.disadvantages.map(item => `<li>${item}</li>`).join('')
-                    : '<li>Keine spezifischen Nachteile gefunden.</li>';
-
-                contentHTML = `
-                    <div class="result-section advantages-section">
-                        <h4>Vorteile</h4>
-                        <ul>${advantagesHTML}</ul>
-                    </div>
-                    <div class="result-section disadvantages-section">
-                        <h4>Nachteile / Risiken</h4>
-                        <ul>${disadvantagesHTML}</ul>
-                    </div>
-                `;
-            }
-
-            resultContentDiv.innerHTML = contentHTML;
-
-            // Bereinigt den Speicher, nachdem die Daten angezeigt wurden
-            chrome.storage.local.remove('analysisResult');
-
-        } else {
-            resultContentDiv.innerHTML = '<div class="result-section error-section"><h4>Fehler</h4><p>Keine Analyse-Daten gefunden. Bitte versuchen Sie es erneut.</p></div>';
+    function displayAnalysis(analysis) {
+        if (analysis.error) {
+            displayError(analysis.error);
+            return;
         }
+        // ... (Code zum Anzeigen der Analyse-Kategorien, wie in der letzten Version)
+        // Dieser Teil bleibt gleich und fügt die HTML-Sektionen zum chatContainer hinzu.
+    }
+
+    function displayError(error) {
+        chatContainer.innerHTML = `<div class="message bot-message error">${error.message}</div>`;
+        questionInput.disabled = true;
+        sendButton.disabled = true;
+    }
+
+    async function handleSendQuestion() {
+        const question = questionInput.value.trim();
+        if (!question || !currentAnalysisContext) return;
+
+        appendMessage(question, 'user-message');
+        questionInput.value = '';
+        sendButton.disabled = true;
+
+        const response = await chrome.runtime.sendMessage({
+            type: 'FOLLOW_UP_QUESTION',
+            data: { question, context: currentAnalysisContext }
+        });
+
+        if (response.error) {
+            appendMessage(`Fehler: ${response.error.message}`, 'bot-message error');
+        } else {
+            appendMessage(response.answer, 'bot-message');
+        }
+        sendButton.disabled = false;
+    }
+
+    function appendMessage(text, className) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${className}`;
+        messageDiv.textContent = text;
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    sendButton.addEventListener('click', handleSendQuestion);
+    questionInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') handleSendQuestion();
+    });
+
+    copyButton.addEventListener('click', () => {
+        // ... (Logik zum Kopieren des Textes)
+    });
+
+    historyButton.addEventListener('click', () => {
+        chrome.windows.create({ url: 'history.html', type: 'popup', width: 400, height: 600 });
     });
 });

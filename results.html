@@ -6,15 +6,20 @@
     <link rel="stylesheet" href="results.css">
 </head>
 <body>
-    <div class="result-modal">
-        <div class="result-header">
+    <div class="container">
+        <div class="header">
             <h3>KI-Fahrzeugbewertung</h3>
+            <div class="header-buttons">
+                <button id="copy-button" title="Ergebnis kopieren">Kopieren</button>
+                <button id="history-button" title="Verlauf anzeigen">Verlauf</button>
+            </div>
         </div>
-        <div class="result-content" id="result-content">
-            <!-- Ergebnisse werden hier per JavaScript eingefügt -->
-            <p>Lade Analyse...</p>
+        <div class="chat-container" id="chat-container">
+            <!-- Analyse und Chat werden hier eingefügt -->
         </div>
-        <div class="result-footer">
+        <div class="input-container">
+            <input type="text" id="question-input" placeholder="Stelle eine Folgefrage...">
+            <button id="send-button">Senden</button>
         </div>
     </div>
     <script src="results.js"></script>

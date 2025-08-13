@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "KI Fahrzeug-Bewerter (Sicher)",
-  "version": "6.1",
-  "description": "Analysiert Fahrzeug-Anzeigen sicher über einen Proxy-Server.",
+  "name": "KI Fahrzeug-Bewerter Pro",
+  "version": "7.0",
+  "description": "Analysiert Fahrzeug-Anzeigen mit Verlauf, Folgefragen und mehr.",
   "permissions": [
     "storage",
     "activeTab",
