@@ -10,7 +10,22 @@ chrome.runtime.onInstalled.addListener(() => {
 // --- Listener für das Kontextmenü ---
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === "analyze-selected-text" && info.selectionText) {
-        handleAnalysisRequest('ANALYZE_TEXT', info.selectionText);
+        const loadingWindow = await chrome.windows.create({
+            url: 'loading.html',
+            type: 'popup',
+            width: 800,
+            height: 650
+        });
+        
+        const analysis = await callBackendForAnalysis('ANALYZE_TEXT', info.selectionText);
+        
+        await chrome.storage.local.set({ currentAnalysis: { analysisData: analysis } });
+
+        // Sendet eine Nachricht an das Ladefenster, dass die Analyse fertig ist
+        chrome.tabs.sendMessage(loadingWindow.tabs[0].id, {
+            type: 'ANALYSIS_COMPLETE',
+            isError: !!analysis.error
+        });
     }
 });
 
@@ -21,7 +36,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
     if (request.type === 'FOLLOW_UP_QUESTION') {
-        // **KORRIGIERT:** Leitet jetzt das gesamte 'request'-Objekt weiter
         callBackendForFollowUp(request).then(response => {
             sendResponse(response);
         });
