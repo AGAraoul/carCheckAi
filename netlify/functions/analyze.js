@@ -38,7 +38,7 @@ exports.handler = async function(event, context) {
         let requestPayload;
 
         if (type === 'FOLLOW_UP_QUESTION') {
-            prompt = `Du bist ein KFZ-Meister. Beantworte die folgende Frage des Nutzers kurz und präzise. Berücksichtige dabei den Kontext der vorherigen Analyse.\n\n**Bisheriger Kontext:**\n${JSON.stringify(context, null, 2)}\n\n**Neue Frage des Nutzers:**\n"${data}"\n\nGib deine Antwort als einfachen Text zurück.`;
+            prompt = `Du bist ein KFZ-Meister. Beantworte die folgende Frage des Nutzers kurz und präzise. Sollten gefragte Informationen nicht im analysierten Text gegeben sein recherchiere detailliert im Internet, ansonsten prorisiere den Kontext der vorherigen Analyse.\n\n**Bisheriger Kontext:**\n${JSON.stringify(context, null, 2)}\n\n**Neue Frage des Nutzers:**\n"${data}"\n\nGib deine Antwort als einfachen Text zurück.`;
             requestPayload = {
                 contents: [{ parts: [{ text: prompt }] }]
             };
