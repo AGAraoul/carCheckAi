@@ -115,8 +115,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const response = await chrome.runtime.sendMessage({
             type: 'FOLLOW_UP_QUESTION',
-            data: question, // 'data' ist jetzt nur die neue Frage
-            history: conversationHistory // 'history' enthält den gesamten Verlauf
+            data: question,
+            // KORRIGIERT: 'history' zu 'context' geändert, um zum Backend zu passen
+            context: conversationHistory 
         });
         
         hideTypingIndicator();
