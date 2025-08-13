@@ -279,7 +279,7 @@ body {
     justify-content: center;
 }
 
-/* NEUE STILE FÜR KOSTEN-MODAL */
+/* Stile für Kosten-Modal */
 .costs-form-container, .costs-result-container {
     padding: 24px;
     overflow-y: auto;
@@ -380,10 +380,21 @@ body {
     margin: 0;
 }
 
-/* NEU: Stile für den Ladebalken im Kosten-Modal */
+/* Stile für den Ladebalken im Kosten-Modal */
+.costs-loading-wrapper {
+    margin-top: 80px;
+    text-align: center;
+}
+
+.costs-loading-text {
+    font-size: 15px;
+    color: #475569;
+    margin-bottom: 12px;
+}
+
 .costs-progress-container {
     width: 90%;
-    margin: 80px auto; /* Zentrieren und mehr Abstand */
+    margin: 0 auto;
     background-color: #e2e8f0;
     border-radius: 8px;
     overflow: hidden;

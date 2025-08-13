@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         costsResultContainer.style.display = 'block';
         costsResultContainer.innerHTML = ''; // Inhalt leeren
         
-        const { progressInterval, progressBar } = showCostsProgressBar(costsResultContainer);
+        const { progressInterval, progressBar, loadingWrapper } = showCostsProgressBar(costsResultContainer);
 
         const response = await chrome.runtime.sendMessage({
             type: 'CALCULATE_OWNERSHIP_COSTS',
@@ -173,6 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isError = !!response.error;
 
         hideCostsProgressBar(progressInterval, progressBar, isError, () => {
+            loadingWrapper.remove(); // Entfernt den gesamten Lade-Wrapper
             if (isError) {
                 costsResultContainer.innerHTML = `<div class="result-section error-section"><h4>Berechnung fehlgeschlagen</h4><p>${response.error.message}</p></div>`;
             } else {
@@ -223,6 +224,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function showCostsProgressBar(container) {
+        // Wrapper für Text und Balken
+        const loadingWrapper = document.createElement('div');
+        loadingWrapper.className = 'costs-loading-wrapper';
+
+        // Ladetext
+        const loadingText = document.createElement('p');
+        loadingText.className = 'costs-loading-text';
+        loadingText.textContent = 'Berechnung der Unterhaltskosten läuft...';
+        
+        // Ladebalken-Container
         const progressContainer = document.createElement('div');
         progressContainer.className = 'costs-progress-container';
         
@@ -230,7 +241,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         progressBar.className = 'costs-progress-bar';
 
         progressContainer.appendChild(progressBar);
-        container.appendChild(progressContainer);
+        loadingWrapper.appendChild(loadingText);
+        loadingWrapper.appendChild(progressContainer);
+        container.appendChild(loadingWrapper);
 
         let width = 0;
         const progressInterval = setInterval(() => {
@@ -240,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }, 100);
 
-        return { progressInterval, progressBar };
+        return { progressInterval, progressBar, loadingWrapper };
     }
 
     function hideCostsProgressBar(intervalId, progressBar, isError, callback) {
