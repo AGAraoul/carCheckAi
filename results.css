@@ -97,7 +97,7 @@ body {
 .disadvantages-section h4 { color: #d97706; }
 .redflags-section h4 { color: #dc2626; }
 .issues-section h4 { color: #581c87; }
-.costs-section h4 { color: #4f46e5; } /* NEU */
+.costs-section h4 { color: #4f46e5; } 
 .error-section h4 { color: #dc2626; }
 
 /* Aktionen unter der Analyse */
@@ -283,6 +283,7 @@ body {
 .costs-form-container, .costs-result-container {
     padding: 24px;
     overflow-y: auto;
+    flex-grow: 1;
 }
 
 .costs-result-container {
@@ -377,6 +378,23 @@ body {
     font-size: 16px;
     color: #4f46e5;
     margin: 0;
+}
+
+/* NEU: Stile für den Ladebalken im Kosten-Modal */
+.costs-progress-container {
+    width: 90%;
+    margin: 80px auto; /* Zentrieren und mehr Abstand */
+    background-color: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.costs-progress-bar {
+    width: 0%;
+    height: 12px;
+    background-color: #4f46e5;
+    border-radius: 8px;
+    transition: width 0.4s ease-in-out, background-color 0.5s ease;
 }
 
 

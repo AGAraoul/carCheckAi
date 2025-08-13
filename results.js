@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const questionInput = document.getElementById('question-input');
     const sendButton = document.getElementById('send-button');
 
-    // --- NEU: Kosten-Elemente ---
+    // --- Kosten-Elemente ---
     const openCostsButton = document.getElementById('open-costs-button');
     const costsOverlay = document.getElementById('costs-overlay');
     const closeCostsButton = document.getElementById('close-costs-button');
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
     
-    // --- 4. NEU: Logik für Kosten-Overlay ---
+    // --- 4. Logik für Kosten-Overlay ---
     openCostsButton.addEventListener('click', () => {
         costsOverlay.classList.add('is-visible');
     });
@@ -153,7 +153,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             location: document.getElementById('location-input').value,
         };
 
-        // Einfache Validierung
         if (!userInfo.age || !userInfo.sfClass || !userInfo.location) {
             alert("Bitte fülle alle Felder aus.");
             return;
@@ -162,7 +161,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         costsFormContainer.style.display = 'none';
         costsResultContainer.style.display = 'block';
         costsResultContainer.innerHTML = ''; // Inhalt leeren
-        showTypingIndicator(costsResultContainer);
+        
+        const { progressInterval, progressBar } = showCostsProgressBar(costsResultContainer);
 
         const response = await chrome.runtime.sendMessage({
             type: 'CALCULATE_OWNERSHIP_COSTS',
@@ -170,13 +170,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             userInfo: userInfo
         });
 
-        hideTypingIndicator(costsResultContainer);
+        const isError = !!response.error;
 
-        if (response.error) {
-            costsResultContainer.innerHTML = `<div class="result-section error-section"><h4>Berechnung fehlgeschlagen</h4><p>${response.error.message}</p></div>`;
-        } else {
-            displayCostResults(response.costs);
-        }
+        hideCostsProgressBar(progressInterval, progressBar, isError, () => {
+            if (isError) {
+                costsResultContainer.innerHTML = `<div class="result-section error-section"><h4>Berechnung fehlgeschlagen</h4><p>${response.error.message}</p></div>`;
+            } else {
+                displayCostResults(response.costs);
+            }
+        });
     });
 
     function displayCostResults(costs) {
@@ -206,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 
-    // --- 5. Hilfsfunktionen für die "Schreibt..."-Animation ---
+    // --- 5. Hilfsfunktionen für Animationen ---
     function showTypingIndicator(container) {
         const indicator = document.createElement('div');
         indicator.className = 'message bot-message typing-indicator';
@@ -218,6 +220,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     function hideTypingIndicator(container) {
         const indicator = container.querySelector('.typing-indicator');
         if (indicator) indicator.remove();
+    }
+
+    function showCostsProgressBar(container) {
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'costs-progress-container';
+        
+        const progressBar = document.createElement('div');
+        progressBar.className = 'costs-progress-bar';
+
+        progressContainer.appendChild(progressBar);
+        container.appendChild(progressContainer);
+
+        let width = 0;
+        const progressInterval = setInterval(() => {
+            if (width < 95) {
+                width += 2;
+                progressBar.style.width = width + '%';
+            }
+        }, 100);
+
+        return { progressInterval, progressBar };
+    }
+
+    function hideCostsProgressBar(intervalId, progressBar, isError, callback) {
+        if (intervalId) clearInterval(intervalId);
+        
+        progressBar.style.width = '100%';
+        progressBar.style.backgroundColor = isError ? '#dc2626' : '#16a34a';
+
+        setTimeout(() => {
+            if (callback) callback();
+        } , 700);
     }
 
     // --- 6. Event-Listener ---
