@@ -23,6 +23,23 @@ body {
     flex-shrink: 0;
 }
 
+.header #main-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b; /* Slate 500 */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.header #vehicle-title {
+    margin: 4px 0 0 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b; /* Slate 800 */
+    line-height: 1.2;
+}
+
 .header h3 {
     margin: 0;
     font-size: 18px;

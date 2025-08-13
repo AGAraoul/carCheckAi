@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const initialAnalysisContainer = document.getElementById('initial-analysis-container');
     const openChatButton = document.getElementById('open-chat-button');
     const copyButton = document.getElementById('copy-button');
+    const vehicleTitleElement = document.getElementById('vehicle-title');
 
     // Elemente des Chat-Overlays
     const chatOverlay = document.getElementById('chat-overlay');
@@ -29,6 +30,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (analysis.error) {
             displayError(analysis.error);
             return;
+        }
+
+        // Setzt den Fahrzeugtitel im Header
+        if (analysis.vehicle_title) {
+            vehicleTitleElement.textContent = analysis.vehicle_title;
+        } else {
+            vehicleTitleElement.textContent = "Unbekanntes Fahrzeug";
         }
 
         const icons = {
@@ -59,15 +67,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function displayError(error) {
-        initialAnalysisContainer.innerHTML = `<div class="result-section error-section"><h4>Fehler</h4><p>${error.message}</p></div>`;
+        vehicleTitleElement.textContent = "Fehler";
+        initialAnalysisContainer.innerHTML = `<div class="result-section error-section"><h4>Analyse fehlgeschlagen</h4><p>${error.message}</p></div>`;
         openChatButton.style.display = 'none';
     }
 
-    // --- 2. Logik für das Chat-Overlay ---
+    // ... (der Rest deiner results.js-Datei bleibt unverändert) ...
     openChatButton.addEventListener('click', () => {
         chatOverlay.classList.add('is-visible');
-        
-        // Zeigt die Willkommensnachricht nur beim ersten Öffnen an
         if (!isWelcomeMessageShown) {
             isWelcomeMessageShown = true;
             showTypingIndicator();
@@ -85,23 +92,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatOverlay.classList.remove('is-visible');
     });
 
-    // --- 3. Logik für Folgefragen ---
     async function handleSendQuestion() {
         const question = questionInput.value.trim();
         if (!question || !originalQueryContext) return;
-
         appendMessage(question, 'user-message');
         questionInput.value = '';
         sendButton.disabled = true;
         showTypingIndicator();
-
         const response = await chrome.runtime.sendMessage({
             type: 'FOLLOW_UP_QUESTION',
             data: { question, context: originalQueryContext }
         });
-        
         hideTypingIndicator();
-
         if (response.error) {
             appendMessage(`Fehler: ${response.error.message}`, 'bot-message error');
         } else {
@@ -119,7 +121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
 
-    // --- 4. Hilfsfunktionen für die "Schreibt..."-Animation ---
     function showTypingIndicator() {
         const indicator = document.createElement('div');
         indicator.className = 'message bot-message typing-indicator';
@@ -130,25 +131,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function hideTypingIndicator() {
         const indicator = chatMessagesContainer.querySelector('.typing-indicator');
-        if (indicator) {
-            indicator.remove();
-        }
+        if (indicator) indicator.remove();
     }
 
-    // --- 5. Event-Listener ---
     sendButton.addEventListener('click', handleSendQuestion);
     questionInput.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') handleSendQuestion();
     });
 
     copyButton.addEventListener('click', () => {
-        let textToCopy = initialAnalysisContainer.innerText;
+        let textToCopy = `${vehicleTitleElement.textContent}\n\n${initialAnalysisContainer.innerText}`;
         const chatText = chatMessagesContainer.innerText;
-
         if (chatText) {
             textToCopy += '\n\n--- Folgefragen ---\n' + chatText;
         }
-                                
         navigator.clipboard.writeText(textToCopy).then(() => {
             copyButton.textContent = 'Kopiert!';
             setTimeout(() => { copyButton.textContent = 'Gesamte Analyse kopieren'; }, 2000);

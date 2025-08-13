@@ -25,7 +25,7 @@ exports.handler = async function(event, context) {
 
     try {
         const requestData = JSON.parse(event.body);
-        const { type, data, context } = requestData; // 'context' für Folgefragen
+        const { type, data, context } = requestData;
 
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
@@ -38,38 +38,32 @@ exports.handler = async function(event, context) {
         let requestPayload;
 
         if (type === 'FOLLOW_UP_QUESTION') {
-            // Prompt für Folgefragen
-            prompt = `Du bist ein KFZ-Meister. Beantworte die folgende Frage des Nutzers kurz und präzise. Berücksichtige dabei den Kontext der vorherigen Analyse, sollten aber keine genauen Informationen in der Analyse vorliegen, recherchiere via Gemini im Internet nach Informationen.
-            
-            **Bisheriger Kontext:**
-            ${JSON.stringify(context, null, 2)}
-
-            **Neue Frage des Nutzers:**
-            "${data}"
-            
-            Gib deine Antwort als einfachen Text zurück.`;
-            
+            prompt = `Du bist ein KFZ-Meister. Beantworte die folgende Frage des Nutzers kurz und präzise. Berücksichtige dabei den Kontext der vorherigen Analyse.\n\n**Bisheriger Kontext:**\n${JSON.stringify(context, null, 2)}\n\n**Neue Frage des Nutzers:**\n"${data}"\n\nGib deine Antwort als einfachen Text zurück.`;
             requestPayload = {
                 contents: [{ parts: [{ text: prompt }] }]
             };
-
         } else {
-            // Bisheriger Prompt für die Erstanalyse
             const jsonFormat = `{
-  "advantages": ["..."], "disadvantages": ["..."], "price_evaluation": "...", "red_flags": ["..."], "model_specific_issues": ["..."], "equipment_summary": "..."
+  "vehicle_title": "Marke, Modell und Ausstattungslinie des Fahrzeugs",
+  "advantages": ["..."],
+  "disadvantages": ["..."],
+  "price_evaluation": "...",
+  "red_flags": ["..."],
+  "model_specific_issues": ["..."],
+  "equipment_summary": "..."
 }`;
             const basePrompt = `Du bist ein extrem erfahrener und kritischer KFZ-Meister. Analysiere die folgenden Fahrzeuginformationen sehr detailliert.
 
 **Deine Aufgaben:**
-1.  **Vor- und Nachteile:** Liste die wichtigsten Vor- und Nachteile auf, die einen direkten Einfluss auf Wert oder Zuverlässigkeit haben.
-2.  **Preiseinschätzung:** Bewerte den Preis basierend auf den Fahrzeugdaten. Ist er fair, günstig oder teuer? Gib eine kurze Begründung.
-3.  **Rote Flaggen:** Identifiziere typische "rote Flaggen" (z.B. "Verkauf im Kundenauftrag", "Bastlerfahrzeug", vage Formulierungen).
-4.  **Modellspezifische Probleme:** Erwähne bekannte Schwachstellen oder teure Wartungsarbeiten für genau dieses Modell und Baujahr.
-5.  **Ausstattung-Zusammenfassung:** Fasse die 3-4 wichtigsten und teuersten Ausstattungsmerkmale zusammen.
+1.  **Fahrzeugtitel extrahieren:** Identifiziere und extrahiere den vollständigen Fahrzeugtitel (Marke, Modell, Ausstattung).
+2.  **Vor- und Nachteile:** Liste die wichtigsten Vor- und Nachteile auf.
+3.  **Preiseinschätzung:** Bewerte den Preis (fair, günstig, teuer) mit kurzer Begründung.
+4.  **Rote Flaggen:** Identifiziere typische "rote Flaggen".
+5.  **Modellspezifische Probleme:** Erwähne bekannte Schwachstellen für dieses Modell.
+6.  **Ausstattung-Zusammenfassung:** Fasse die 3-4 wichtigsten Ausstattungsmerkmale zusammen.
 
 **Antwortformat:**
-Gib deine Antwort NUR als JSON-Objekt zurück, ohne umschließende Markdown-Syntax. Das JSON-Objekt muss exakt folgendes Format haben:
-${jsonFormat}`;
+Gib deine Antwort NUR als JSON-Objekt zurück, ohne umschließende Markdown-Syntax. Das JSON-Objekt muss exakt folgendes Format haben:\n${jsonFormat}`;
 
             if (type === 'ANALYZE_TEXT') {
                 prompt = `${basePrompt}\n\n**Analysiere diesen Text:** "${data}"`;
