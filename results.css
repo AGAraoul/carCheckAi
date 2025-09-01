@@ -1,21 +1,49 @@
-/* Globale Stile & Schriften */
+/* --- THEME VARIABLEN --- */
+/* Light Mode (Standard) */
 :root {
-    --bg-primary: #111827; /* Dunkelblau/Schwarz */
-    --bg-secondary: #1f2937; /* Dunkleres Grau */
-    --bg-tertiary: #374151; /* Helleres Grau */
-    --border-color: #4b5563;
-    --text-primary: #f9fafb; /* Fast Weiß */
-    --text-secondary: #d1d5db; /* Helles Grau */
-    --text-muted: #9ca3af; /* Gedämpftes Grau */
-    
+    --bg-primary: #f9fafb;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f3f4f6;
+    --border-color: #e5e7eb;
+    --text-primary: #111827;
+    --text-secondary: #374151;
+    --text-muted: #6b7280;
+
     --accent-blue: #3b82f6;
     --accent-green: #22c55e;
     --accent-amber: #f59e0b;
     --accent-red: #ef4444;
     --accent-purple: #8b5cf6;
     --accent-teal: #14b8a6;
+
+    --price-fair-bg: rgba(59, 130, 246, 0.1);
+    --price-fair-text: #2563eb;
+    --price-good-bg: rgba(34, 197, 94, 0.1);
+    --price-good-text: #16a34a;
+    --price-expensive-bg: rgba(245, 158, 11, 0.1);
+    --price-expensive-text: #d97706;
 }
 
+/* Dark Mode */
+body[data-theme="dark"] {
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --border-color: #4b5563;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+
+    --price-fair-bg: rgba(59, 130, 246, 0.2);
+    --price-fair-text: #93c5fd;
+    --price-good-bg: rgba(34, 197, 94, 0.2);
+    --price-good-text: #86efac;
+    --price-expensive-bg: rgba(245, 158, 11, 0.2);
+    --price-expensive-text: #fcd34d;
+}
+
+
+/* Globale Stile & Schriften */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     background-color: var(--bg-primary);
@@ -23,6 +51,7 @@ body {
     margin: 0;
     height: 100vh;
     overflow: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Haupt-Container */
@@ -74,6 +103,7 @@ body {
 /* Header-Aktionen */
 .header-actions {
     display: flex;
+    align-items: center;
     gap: 10px;
     flex-shrink: 0;
 }
@@ -100,9 +130,66 @@ body {
     transform: translateY(-1px);
 }
 
-.header-button:active {
-    transform: scale(0.95);
+/* --- THEME SWITCH STYLES --- */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
 }
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-tertiary);
+    transition: .4s;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+}
+.slider.round {
+    border-radius: 34px;
+}
+.slider .sun-icon, .slider .moon-icon {
+    position: absolute;
+    font-size: 14px;
+    transition: opacity 0.4s ease;
+}
+.sun-icon { left: 5px; opacity: 0; }
+.moon-icon { right: 5px; opacity: 1; }
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .slider {
+    background-color: var(--accent-blue);
+}
+input:checked + .slider:before {
+    transform: translateX(24px);
+    background-color: white;
+}
+input:checked + .slider .sun-icon { opacity: 1; }
+input:checked + .slider .moon-icon { opacity: 0; }
+
 
 /* Analyse-Container */
 .analysis-container {
@@ -114,13 +201,17 @@ body {
 
 /* Modernisierte Preiskarte */
 .price-card {
-    background: linear-gradient(145deg, var(--bg-secondary), #2a3547);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 20px 24px;
     margin-bottom: 20px;
     text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+body[data-theme="dark"] .price-card {
+     background: linear-gradient(145deg, var(--bg-secondary), #2a3547);
+     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
 .price-card .price-tag {
@@ -138,11 +229,9 @@ body {
     display: inline-block;
     margin: 0 0 12px 0;
 }
-
-/* Dynamische Farben für Preisbewertung */
-.price-evaluation.fair { background-color: rgba(59, 130, 246, 0.2); color: #93c5fd; }
-.price-evaluation.good { background-color: rgba(34, 197, 94, 0.2); color: #86efac; }
-.price-evaluation.expensive { background-color: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+.price-evaluation.fair { background-color: var(--price-fair-bg); color: var(--price-fair-text); }
+.price-evaluation.good { background-color: var(--price-good-bg); color: var(--price-good-text); }
+.price-evaluation.expensive { background-color: var(--price-expensive-bg); color: var(--price-expensive-text); }
 
 .price-card .price-reasoning {
     font-size: 14px;
@@ -154,7 +243,6 @@ body {
     margin-right: auto;
 }
 
-
 /* Analyse-Karten Design */
 .result-section {
     background-color: var(--bg-secondary);
@@ -162,7 +250,7 @@ body {
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
 
 .result-section h4 {
@@ -175,10 +263,10 @@ body {
     padding-bottom: 8px;
     border-bottom: 1px solid var(--border-color);
 }
-
 .result-section h4 svg { flex-shrink: 0; }
 .result-section ul { list-style-type: none; padding-left: 0; margin: 0; color: var(--text-secondary); }
-.result-section li { padding: 6px 0; border-bottom: 1px solid #374151; }
+.result-section li { padding: 6px 0; border-bottom: 1px solid var(--bg-tertiary); }
+body[data-theme="dark"] .result-section li { border-bottom-color: #374151; }
 .result-section li:last-child { border-bottom: none; }
 .result-section p { margin: 0; color: var(--text-secondary); }
 
@@ -194,7 +282,7 @@ body {
 /* Chat & Overlay Allgemein */
 .chat-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(10, 10, 10, 0.7);
+    background-color: rgba(10, 10, 10, 0.5);
     backdrop-filter: blur(5px);
     display: flex; justify-content: center; align-items: flex-end;
     opacity: 0; visibility: hidden;
@@ -209,7 +297,7 @@ body {
     width: 100%; max-width: 700px; height: 85%; max-height: 800px;
     border-radius: 16px 16px 0 0;
     display: flex; flex-direction: column;
-    box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
+    box-shadow: 0 -4px 30px rgba(0,0,0,0.2);
     transform: translateY(100%);
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -245,11 +333,9 @@ body {
 
 /* Kosten & Share Modal Stile */
 .costs-form-container, .costs-result-container, .share-container { padding: 24px; overflow-y: auto; flex-grow: 1; }
-.costs-result-container, .share-container { display: block; }
 .costs-result-container { display: none; }
 .form-intro { font-size: 15px; color: var(--text-secondary); margin: 0 0 20px 0; text-align: center; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-.share-container .form-group { margin-bottom: 16px; }
 .form-group { display: flex; flex-direction: column; }
 .form-group label { font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
 .form-group input, .form-group select {
@@ -267,18 +353,19 @@ body {
 #send-whatsapp-button { background-color: #25D366; }
 #send-whatsapp-button:hover { background-color: #1DAA53; }
 
-.share-status { font-size: 14px; text-align: center; margin-top: 12px; min-height: 20px; }
-.costs-result-container .result-section { padding: 20px; }
-.costs-summary { text-align: center; padding: 20px; background-color: #1e40af; border-radius: 12px; margin-top: 24px; }
+.costs-summary { text-align: center; padding: 20px; background-color: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; margin-top: 24px; }
+body[data-theme="dark"] .costs-summary { background-color: #1e40af; border: none;}
 .costs-summary h3 { margin: 0 0 4px 0; font-size: 16px; color: #93c5fd; }
+body[data-theme="light"] .costs-summary h3 { color: #1e40af;}
 .costs-summary .total-annual { font-size: 28px; font-weight: 700; color: white; margin: 0 0 4px 0; }
+body[data-theme="light"] .costs-summary .total-annual { color: #1d4ed8; }
 .costs-summary .total-monthly { font-size: 16px; color: #dbeafe; margin: 0; }
+body[data-theme="light"] .costs-summary .total-monthly { color: var(--accent-blue); }
+
 .costs-loading-wrapper { margin-top: 80px; text-align: center; }
 .costs-loading-text { font-size: 15px; color: var(--text-secondary); margin-bottom: 12px; }
 .costs-progress-container { width: 90%; margin: 0 auto; background-color: var(--bg-tertiary); border-radius: 8px; overflow: hidden; }
 .costs-progress-bar { width: 0%; height: 12px; background-color: var(--accent-blue); border-radius: 8px; transition: width 0.4s ease-in-out, background-color 0.5s ease; }
-
-/* "Schreibt..."-Animation */
 .typing-indicator { padding: 12px 16px !important; display: flex; align-items: center; gap: 5px; }
 .typing-indicator span { height: 8px; width: 8px; background-color: #9ca3af; border-radius: 50%; animation: typing 1.2s infinite ease-in-out; }
 .typing-indicator span:nth-child(1) { animation-delay: 0s; }

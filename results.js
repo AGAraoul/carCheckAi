@@ -2,9 +2,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Globale Elemente ---
     const vehicleTitleElement = document.getElementById('vehicle-title');
     const initialAnalysisContainer = document.getElementById('initial-analysis-container');
+    const priceSectionContainer = document.getElementById('price-section-container');
     const headerActions = document.querySelector('.header-actions');
     
-    // --- Header-Buttons ---
+    // --- Header-Buttons & Theme Switch ---
+    const themeSwitch = document.getElementById('theme-switch-checkbox');
     const headerCostsButton = document.getElementById('header-costs-button');
     const headerChatButton = document.getElementById('header-chat-button');
     const headerShareButton = document.getElementById('header-share-button');
@@ -23,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const costsResultContainer = document.getElementById('costs-result-container');
     const calculateCostsButton = document.getElementById('calculate-costs-button');
 
-    // --- Share-Elemente (NEU) ---
+    // --- Share-Elemente ---
     const shareOverlay = document.getElementById('share-overlay');
     const closeShareButton = document.getElementById('close-share-button');
     const sendWhatsappButton = document.getElementById('send-whatsapp-button');
@@ -33,6 +35,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Globale Zustände ---
     let initialAnalysisData = null;
     let isWelcomeMessageShown = false;
+
+    // --- 0. Theme-Management ---
+    function applyTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        themeSwitch.checked = theme === 'light';
+    }
+
+    function toggleTheme() {
+        const newTheme = themeSwitch.checked ? 'light' : 'dark';
+        applyTheme(newTheme);
+        chrome.storage.local.set({ theme: newTheme });
+    }
+
+    // Lade gespeichertes Theme beim Start
+    chrome.storage.local.get('theme', (data) => {
+        const savedTheme = data.theme || 'dark'; // Standard auf dark
+        applyTheme(savedTheme);
+    });
+
+    themeSwitch.addEventListener('change', toggleTheme);
+
 
     // --- 1. Laden der Erstanalyse ---
     try {
@@ -55,9 +78,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         vehicleTitleElement.textContent = analysis.vehicle_title || "Unbekanntes Fahrzeug";
+        
+        const priceEvaluationText = analysis.price_evaluation || "";
+        const priceMatch = priceEvaluationText.match(/(\d{1,3}(?:\.\d{3})*(?:,\d{2})?\s*€)/);
+        const price = priceMatch ? priceMatch[0] : "N/A";
+
+        let evaluationClass = '';
+        let evaluationText = 'Unbewertet';
+
+        if (priceEvaluationText.toLowerCase().includes('fair')) {
+            evaluationClass = 'fair';
+            evaluationText = 'Faires Angebot';
+        } else if (priceEvaluationText.toLowerCase().includes('günstig')) {
+            evaluationClass = 'good';
+            evaluationText = 'Gutes Angebot';
+        } else if (priceEvaluationText.toLowerCase().includes('teuer')) {
+            evaluationClass = 'expensive';
+            evaluationText = 'Eher teuer';
+        }
+
+        const reasoning = priceEvaluationText.replace(/.*?€\s*-\s*/, '');
+        
+        priceSectionContainer.innerHTML = `
+            <div class="price-card">
+                <p class="price-tag">${price}</p>
+                <span class="price-evaluation ${evaluationClass}">${evaluationText}</span>
+                <p class="price-reasoning">${reasoning}</p>
+            </div>
+        `;
 
         const icons = {
-            price: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
             equipment: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-4.44a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8.88a2 2 0 0 0 2-2v-8.88z"></path><path d="M18 2h-2.12a2 2 0 0 0-1.77 1.03L12 6"></path></svg>`,
             advantages: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
             disadvantages: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
@@ -72,7 +122,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const analysisHTML = `
-            ${createSection('Preiseinschätzung', analysis.price_evaluation, 'price-section', icons.price)}
             ${createSection('Top-Ausstattung', analysis.equipment_summary, 'equipment-section', icons.equipment)}
             ${createSection('Vorteile', analysis.advantages, 'advantages-section', icons.advantages)}
             ${createSection('Nachteile / Risiken', analysis.disadvantages, 'disadvantages-section', icons.disadvantages)}
@@ -80,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             ${createSection('Bekannte Modell-Probleme', analysis.model_specific_issues, 'issues-section', icons.issues)}
         `;
         
-        initialAnalysisContainer.innerHTML = analysisHTML;
+        initialAnalysisContainer.insertAdjacentHTML('beforeend', analysisHTML);
     }
 
     function displayError(error) {
@@ -91,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // --- 2. Logik für das Chat-Overlay ---
+    // --- 2. Event-Listener für Header-Buttons & Overlays ---
     headerChatButton.addEventListener('click', () => {
         chatOverlay.classList.add('is-visible');
         if (!isWelcomeMessageShown) {
@@ -106,8 +155,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             questionInput.focus();
         }
     });
-
     closeChatButton.addEventListener('click', () => chatOverlay.classList.remove('is-visible'));
+    
+    headerCostsButton.addEventListener('click', () => costsOverlay.classList.add('is-visible'));
+    closeCostsButton.addEventListener('click', () => costsOverlay.classList.remove('is-visible'));
+    
+    headerShareButton.addEventListener('click', () => {
+        shareOverlay.classList.add('is-visible');
+        phoneInput.focus();
+    });
+    closeShareButton.addEventListener('click', () => shareOverlay.classList.remove('is-visible'));
+
 
     // --- 3. Logik für Folgefragen ---
     async function handleSendQuestion() {
@@ -147,15 +205,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
     
+
     // --- 4. Logik für Kosten-Overlay ---
-    headerCostsButton.addEventListener('click', () => {
-        costsOverlay.classList.add('is-visible');
-    });
-
-    closeCostsButton.addEventListener('click', () => {
-        costsOverlay.classList.remove('is-visible');
-    });
-
     calculateCostsButton.addEventListener('click', async () => {
         const userInfo = {
             age: document.getElementById('age-input').value,
@@ -171,7 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         costsFormContainer.style.display = 'none';
         costsResultContainer.style.display = 'block';
-        costsResultContainer.innerHTML = ''; // Inhalt leeren
+        costsResultContainer.innerHTML = '';
         
         const { progressInterval, progressBar, loadingWrapper } = showCostsProgressBar(costsResultContainer);
 
@@ -184,7 +235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isError = !!response.error;
 
         hideCostsProgressBar(progressInterval, progressBar, isError, () => {
-            loadingWrapper.remove(); // Entfernt den gesamten Lade-Wrapper
+            loadingWrapper.remove();
             if (isError) {
                 costsResultContainer.innerHTML = `<div class="result-section error-section"><h4>Berechnung fehlgeschlagen</h4><p>${response.error.message}</p></div>`;
             } else {
@@ -200,7 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="result-section costs-section">
                     <h4>${title}</h4>
                     <p><b>~ ${costItem.amount} € / Jahr</b></p>
-                    <p style="font-size: 13px; color: #64748b;">${costItem.details}</p>
+                    <p style="font-size: 13px; color: var(--text-muted);">${costItem.details}</p>
                 </div>
             `;
         };
@@ -219,28 +270,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         costsResultContainer.innerHTML = costsHTML;
     }
 
-    // --- 5. Logik für WhatsApp Share (NEU) ---
-    headerShareButton.addEventListener('click', () => {
-        shareOverlay.classList.add('is-visible');
-        phoneInput.focus();
-    });
 
-    closeShareButton.addEventListener('click', () => {
-        shareOverlay.classList.remove('is-visible');
-    });
-
+    // --- 5. Logik für WhatsApp Share ---
     sendWhatsappButton.addEventListener('click', () => {
-        const phoneNumber = phoneInput.value.replace(/[\s+()-]/g, ''); // Bereinigt die Nummer
-        
+        const phoneNumber = phoneInput.value.replace(/[\s+()-]/g, '');
         if (!/^\d+$/.test(phoneNumber) || phoneNumber.length < 10) {
             shareStatus.textContent = 'Bitte eine gültige Handynummer eingeben.';
-            shareStatus.style.color = '#dc2626';
+            shareStatus.style.color = 'var(--accent-red)';
             return;
         }
         shareStatus.textContent = '';
 
-        // --- Analyse-Text für WhatsApp formatieren ---
         let textToShare = `*KI Fahrzeug-Bewertung für: ${vehicleTitleElement.textContent}*\n\n`;
+        const priceCard = document.querySelector('.price-card');
+        if (priceCard) {
+            const price = priceCard.querySelector('.price-tag').innerText;
+            const eval = priceCard.querySelector('.price-evaluation').innerText;
+            const reason = priceCard.querySelector('.price-reasoning').innerText;
+            textToShare += `*${price}* - ${eval}\n_${reason}_\n\n`;
+        }
+        
         const sections = initialAnalysisContainer.querySelectorAll('.result-section');
         sections.forEach(section => {
             const title = section.querySelector('h4').innerText.trim();
@@ -248,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const content = section.querySelector('ul, p');
             if (content.tagName === 'P') {
                 textToShare += content.innerText.trim() + '\n\n';
-            } else { // UL
+            } else {
                 const items = content.querySelectorAll('li');
                 items.forEach(item => { textToShare += `- ${item.innerText.trim()}\n`; });
                 textToShare += '\n';
@@ -267,7 +316,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             textToShare += formattedChat;
         }
 
-        // --- WhatsApp Link öffnen ---
         const encodedText = encodeURIComponent(textToShare);
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedText}`;
         window.open(whatsappUrl, '_blank');
@@ -305,10 +353,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         container.appendChild(loadingWrapper);
         let width = 0;
         const progressInterval = setInterval(() => {
-            if (width < 95) {
-                width += 2;
-                progressBar.style.width = width + '%';
-            }
+            if (width < 95) { width += 2; progressBar.style.width = width + '%'; }
         }, 100);
         return { progressInterval, progressBar, loadingWrapper };
     }
@@ -316,13 +361,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     function hideCostsProgressBar(intervalId, progressBar, isError, callback) {
         if (intervalId) clearInterval(intervalId);
         progressBar.style.width = '100%';
-        progressBar.style.backgroundColor = isError ? '#dc2626' : '#16a34a';
-        setTimeout(() => { if (callback) callback(); } , 700);
+        progressBar.style.backgroundColor = isError ? 'var(--accent-red)' : 'var(--accent-green)';
+        setTimeout(() => { if (callback) callback(); }, 700);
     }
+    
 
-    // --- 7. Event-Listener ---
+    // --- 7. Event-Listener für Chat-Input ---
     sendButton.addEventListener('click', handleSendQuestion);
     questionInput.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') handleSendQuestion();
     });
 });
+

@@ -14,8 +14,18 @@
                 <h3 id="vehicle-title">Analyse wird geladen...</h3>
             </div>
             <div class="header-actions">
+                <!-- NEU: Theme Switch -->
+                <div class="theme-switch-wrapper">
+                    <label class="theme-switch" for="theme-switch-checkbox" title="Toggle Dark/Light Mode">
+                        <input type="checkbox" id="theme-switch-checkbox" />
+                        <div class="slider round">
+                             <span class="sun-icon">☀️</span>
+                             <span class="moon-icon">🌙</span>
+                        </div>
+                    </label>
+                </div>
                 <button id="header-costs-button" class="header-button" title="Unterhaltskosten berechnen">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 16v-6M12 8h.01"></path></svg>
                 </button>
                 <button id="header-chat-button" class="header-button" title="Folgefrage stellen">
                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -27,7 +37,9 @@
         </div>
         
         <div class="analysis-container" id="initial-analysis-container">
-            <!-- Die Erstanalyse wird hier per JavaScript eingefügt -->
+            <!-- Die Preiskarte wird hier eingefügt -->
+            <div id="price-section-container"></div>
+            <!-- Die weitere Analyse wird hier per JavaScript eingefügt -->
         </div>
     </div>
 
@@ -92,7 +104,7 @@
         </div>
     </div>
 
-    <!-- NEU: Verstecktes Overlay für WhatsApp-Versand -->
+    <!-- Verstecktes Overlay für WhatsApp-Versand -->
     <div class="chat-overlay" id="share-overlay">
         <div class="chat-window" id="share-window">
             <div class="chat-header">
@@ -117,3 +129,4 @@
     <script src="results.js"></script>
 </body>
 </html>
+
