@@ -2,10 +2,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Globale Elemente ---
     const vehicleTitleElement = document.getElementById('vehicle-title');
     const initialAnalysisContainer = document.getElementById('initial-analysis-container');
-    const copyButton = document.getElementById('copy-button');
+    const headerActions = document.querySelector('.header-actions');
     
+    // --- Header-Buttons ---
+    const headerCostsButton = document.getElementById('header-costs-button');
+    const headerChatButton = document.getElementById('header-chat-button');
+    const headerShareButton = document.getElementById('header-share-button');
+
     // --- Chat-Elemente ---
-    const openChatButton = document.getElementById('open-chat-button');
     const chatOverlay = document.getElementById('chat-overlay');
     const closeChatButton = document.getElementById('close-chat-button');
     const chatMessagesContainer = document.getElementById('chat-messages-container');
@@ -13,12 +17,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sendButton = document.getElementById('send-button');
 
     // --- Kosten-Elemente ---
-    const openCostsButton = document.getElementById('open-costs-button');
     const costsOverlay = document.getElementById('costs-overlay');
     const closeCostsButton = document.getElementById('close-costs-button');
     const costsFormContainer = document.getElementById('costs-form-container');
     const costsResultContainer = document.getElementById('costs-result-container');
     const calculateCostsButton = document.getElementById('calculate-costs-button');
+
+    // --- Share-Elemente (NEU) ---
+    const shareOverlay = document.getElementById('share-overlay');
+    const closeShareButton = document.getElementById('close-share-button');
+    const sendWhatsappButton = document.getElementById('send-whatsapp-button');
+    const phoneInput = document.getElementById('phone-input');
+    const shareStatus = document.getElementById('share-status');
 
     // --- Globale Zustände ---
     let initialAnalysisData = null;
@@ -76,12 +86,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     function displayError(error) {
         vehicleTitleElement.textContent = "Fehler";
         initialAnalysisContainer.innerHTML = `<div class="result-section error-section"><h4>Analyse fehlgeschlagen</h4><p>${error.message}</p></div>`;
-        openChatButton.style.display = 'none';
-        openCostsButton.style.display = 'none';
+        if (headerActions) {
+            headerActions.style.display = 'none';
+        }
     }
 
     // --- 2. Logik für das Chat-Overlay ---
-    openChatButton.addEventListener('click', () => {
+    headerChatButton.addEventListener('click', () => {
         chatOverlay.classList.add('is-visible');
         if (!isWelcomeMessageShown) {
             isWelcomeMessageShown = true;
@@ -137,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // --- 4. Logik für Kosten-Overlay ---
-    openCostsButton.addEventListener('click', () => {
+    headerCostsButton.addEventListener('click', () => {
         costsOverlay.classList.add('is-visible');
     });
 
@@ -208,8 +219,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         costsResultContainer.innerHTML = costsHTML;
     }
 
+    // --- 5. Logik für WhatsApp Share (NEU) ---
+    headerShareButton.addEventListener('click', () => {
+        shareOverlay.classList.add('is-visible');
+        phoneInput.focus();
+    });
 
-    // --- 5. Hilfsfunktionen für Animationen ---
+    closeShareButton.addEventListener('click', () => {
+        shareOverlay.classList.remove('is-visible');
+    });
+
+    sendWhatsappButton.addEventListener('click', () => {
+        const phoneNumber = phoneInput.value.replace(/[\s+()-]/g, ''); // Bereinigt die Nummer
+        
+        if (!/^\d+$/.test(phoneNumber) || phoneNumber.length < 10) {
+            shareStatus.textContent = 'Bitte eine gültige Handynummer eingeben.';
+            shareStatus.style.color = '#dc2626';
+            return;
+        }
+        shareStatus.textContent = '';
+
+        // --- Analyse-Text für WhatsApp formatieren ---
+        let textToShare = `*KI Fahrzeug-Bewertung für: ${vehicleTitleElement.textContent}*\n\n`;
+        const sections = initialAnalysisContainer.querySelectorAll('.result-section');
+        sections.forEach(section => {
+            const title = section.querySelector('h4').innerText.trim();
+            textToShare += `*${title}*\n`;
+            const content = section.querySelector('ul, p');
+            if (content.tagName === 'P') {
+                textToShare += content.innerText.trim() + '\n\n';
+            } else { // UL
+                const items = content.querySelectorAll('li');
+                items.forEach(item => { textToShare += `- ${item.innerText.trim()}\n`; });
+                textToShare += '\n';
+            }
+        });
+        const chatText = chatMessagesContainer.innerText;
+        if (chatText && chatText.trim() !== '') {
+            let formattedChat = '*--- Folgefragen --*\n';
+            const messages = chatMessagesContainer.querySelectorAll('.message');
+            messages.forEach(msg => {
+                if (!msg.classList.contains('typing-indicator')) {
+                    const prefix = msg.classList.contains('user-message') ? 'Du:' : 'Meister:';
+                    formattedChat += `${prefix} ${msg.innerText.trim()}\n`;
+                }
+            });
+            textToShare += formattedChat;
+        }
+
+        // --- WhatsApp Link öffnen ---
+        const encodedText = encodeURIComponent(textToShare);
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedText}`;
+        window.open(whatsappUrl, '_blank');
+        shareOverlay.classList.remove('is-visible');
+    });
+
+
+    // --- 6. Hilfsfunktionen für Animationen ---
     function showTypingIndicator(container) {
         const indicator = document.createElement('div');
         indicator.className = 'message bot-message typing-indicator';
@@ -224,27 +290,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function showCostsProgressBar(container) {
-        // Wrapper für Text und Balken
         const loadingWrapper = document.createElement('div');
         loadingWrapper.className = 'costs-loading-wrapper';
-
-        // Ladetext
         const loadingText = document.createElement('p');
         loadingText.className = 'costs-loading-text';
         loadingText.textContent = 'Berechnung der Unterhaltskosten läuft...';
-        
-        // Ladebalken-Container
         const progressContainer = document.createElement('div');
         progressContainer.className = 'costs-progress-container';
-        
         const progressBar = document.createElement('div');
         progressBar.className = 'costs-progress-bar';
-
         progressContainer.appendChild(progressBar);
         loadingWrapper.appendChild(loadingText);
         loadingWrapper.appendChild(progressContainer);
         container.appendChild(loadingWrapper);
-
         let width = 0;
         const progressInterval = setInterval(() => {
             if (width < 95) {
@@ -252,36 +310,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 progressBar.style.width = width + '%';
             }
         }, 100);
-
         return { progressInterval, progressBar, loadingWrapper };
     }
 
     function hideCostsProgressBar(intervalId, progressBar, isError, callback) {
         if (intervalId) clearInterval(intervalId);
-        
         progressBar.style.width = '100%';
         progressBar.style.backgroundColor = isError ? '#dc2626' : '#16a34a';
-
-        setTimeout(() => {
-            if (callback) callback();
-        } , 700);
+        setTimeout(() => { if (callback) callback(); } , 700);
     }
 
-    // --- 6. Event-Listener ---
+    // --- 7. Event-Listener ---
     sendButton.addEventListener('click', handleSendQuestion);
     questionInput.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') handleSendQuestion();
-    });
-
-    copyButton.addEventListener('click', () => {
-        let textToCopy = `${vehicleTitleElement.textContent}\n\n${initialAnalysisContainer.innerText}`;
-        const chatText = chatMessagesContainer.innerText;
-        if (chatText) {
-            textToCopy += '\n\n--- Folgefragen ---\n' + chatText;
-        }
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            copyButton.textContent = 'Kopiert!';
-            setTimeout(() => { copyButton.textContent = 'Gesamte Analyse kopieren'; }, 2000);
-        });
     });
 });

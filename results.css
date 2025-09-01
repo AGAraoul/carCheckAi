@@ -21,6 +21,15 @@ body {
     background-color: white;
     border-bottom: 1px solid #e2e8f0; /* Slate 200 */
     flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-content {
+    flex-grow: 1;
+    min-width: 0;
 }
 
 .header #main-title {
@@ -38,7 +47,48 @@ body {
     font-weight: 700;
     color: #1e293b; /* Slate 800 */
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+/* Header-Aktionen (NEU) */
+.header-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.header-button {
+    background-color: #f1f5f9; /* Slate 100 */
+    color: #475569; /* Slate 600 */
+    border: 1px solid #e2e8f0; /* Slate 200 */
+    border-radius: 50%; /* Runde Buttons */
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.header-button:hover {
+    background-color: #e2e8f0; /* Slate 200 */
+    border-color: #cbd5e1; /* Slate 300 */
+    transform: translateY(-1px);
+}
+
+.header-button:active {
+    transform: scale(0.95);
+}
+
+.header-button svg {
+    width: 20px;
+    height: 20px;
+}
+
 
 /* Analyse-Container */
 .analysis-container {
@@ -100,56 +150,8 @@ body {
 .costs-section h4 { color: #4f46e5; } 
 .error-section h4 { color: #dc2626; }
 
-/* Aktionen unter der Analyse */
-.main-actions {
-    padding: 16px 24px;
-    background-color: white;
-    border-top: 1px solid #e2e8f0;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
 
-#open-chat-button, #copy-button, #open-costs-button {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s, transform 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-#open-chat-button, #open-costs-button {
-    background-color: #4f46e5;
-    color: white;
-    border: none;
-}
-
-#open-chat-button:hover, #open-costs-button:hover {
-    background-color: #4338ca;
-}
-
-#copy-button {
-    background-color: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-}
-
-#copy-button:hover {
-    background-color: #e2e8f0;
-}
-
-#open-chat-button:active, #copy-button:active, #open-costs-button:active {
-    transform: scale(0.98);
-}
-
-/* Chat & Kosten Overlay */
+/* Chat & Overlay Allgemein */
 .chat-overlay {
     position: fixed;
     top: 0;
@@ -185,6 +187,12 @@ body {
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+#share-window {
+    height: auto;
+    max-height: 400px;
+}
+
+
 .chat-overlay.is-visible .chat-window {
     transform: translateY(0);
 }
@@ -204,7 +212,7 @@ body {
     color: #1e293b;
 }
 
-#close-chat-button, #close-costs-button {
+#close-chat-button, #close-costs-button, #close-share-button {
     background: none;
     border: none;
     font-size: 28px;
@@ -215,6 +223,7 @@ body {
     line-height: 1;
 }
 
+/* Chat-spezifisch */
 .chat-messages {
     flex-grow: 1;
     overflow-y: auto;
@@ -279,16 +288,20 @@ body {
     justify-content: center;
 }
 
-/* Stile für Kosten-Modal */
-.costs-form-container, .costs-result-container {
+/* Kosten & Share Modal Stile */
+.costs-form-container, .costs-result-container, .share-container {
     padding: 24px;
     overflow-y: auto;
     flex-grow: 1;
 }
 
+.costs-result-container, .share-container {
+    display: block;
+}
 .costs-result-container {
     display: none; /* Wird per JS sichtbar gemacht */
 }
+
 
 .form-intro {
     font-size: 15px;
@@ -302,6 +315,10 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 16px;
     margin-bottom: 24px;
+}
+
+.share-container .form-group {
+    margin-bottom: 16px;
 }
 
 .form-group {
@@ -330,14 +347,13 @@ body {
     box-shadow: 0 0 0 2px #c7d2fe;
 }
 
-#calculate-costs-button {
+#calculate-costs-button, #send-whatsapp-button {
     width: 100%;
     padding: 12px;
     border-radius: 8px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    background-color: #16a34a;
     color: white;
     border: none;
     display: flex;
@@ -345,9 +361,27 @@ body {
     justify-content: center;
     gap: 8px;
 }
+#calculate-costs-button {
+    background-color: #16a34a;
+}
 #calculate-costs-button:hover {
     background-color: #15803d;
 }
+
+#send-whatsapp-button {
+    background-color: #25D366;
+}
+#send-whatsapp-button:hover {
+    background-color: #1DAA53;
+}
+
+.share-status {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 12px;
+    min-height: 20px;
+}
+
 
 .costs-result-container .result-section {
     padding: 20px;
