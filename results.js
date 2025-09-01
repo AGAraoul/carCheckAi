@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         shareStatus.textContent = '';
 
-        let textToShare = `*KI Fahrzeug-Bewertung für: ${vehicleTitleElement.textContent}*\n\n`;
+        let textToShare = `*AGA's CarCheck für: ${vehicleTitleElement.textContent}*\n\n`;
         const priceCard = document.querySelector('.price-card');
         if (priceCard) {
             const price = priceCard.querySelector('.price-tag').innerText;
