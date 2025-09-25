@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "AGA's CarCheck",
+  "name": "CarCheck AI",
   "version": "10.0",
   "description": "Analysiert Fahrzeug-Anzeigen mit Verlauf, Folgefragen und mehr.",
   "permissions": [

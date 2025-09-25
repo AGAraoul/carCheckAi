@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Share-Elemente ---
     const shareOverlay = document.getElementById('share-overlay');
     const closeShareButton = document.getElementById('close-share-button');
-    const sendWhatsappButton = document.getElementById('send-whatsapp-button');
-    const phoneInput = document.getElementById('phone-input');
+    const copyTextButton = document.getElementById('copy-text-button');
     const shareStatus = document.getElementById('share-status');
+    const hiddenShareTextarea = document.getElementById('hidden-share-textarea');
 
     // --- Globale Zustände ---
     let initialAnalysisData = null;
@@ -48,12 +48,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         chrome.storage.local.set({ theme: newTheme });
     }
 
-    // Lade gespeichertes Theme beim Start
     chrome.storage.local.get('theme', (data) => {
         const savedTheme = data.theme || 'dark'; // Standard auf dark
         applyTheme(savedTheme);
     });
-
     themeSwitch.addEventListener('change', toggleTheme);
 
 
@@ -70,6 +68,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) {
         displayError({ message: "Ein unerwarteter Fehler ist aufgetreten." });
     }
+
+    // Trigger animations after a short delay
+    setTimeout(() => {
+        document.body.classList.remove('loading');
+    }, 100);
 
     function displayAnalysis(analysis) {
         if (analysis.error) {
@@ -108,10 +111,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
 
         const icons = {
-            equipment: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-4.44a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8.88a2 2 0 0 0 2-2v-8.88z"></path><path d="M18 2h-2.12a2 2 0 0 0-1.77 1.03L12 6"></path></svg>`,
+            equipment: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>`,
             advantages: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
             disadvantages: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
-            red_flags: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`,
+            red_flags: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 18 18"></path><path d="M10.5 10.5c.383-1.11.96-2.122 1.83-2.992"></path><path d="M15 12c0-2.5-2-5-5-5"></path><path d="M18.5 18.5c-2.3-2.3-5-4.5-8-4.5"></path><path d="M2 21c3-3 5.7-5 9-5"></path></svg>`,
             issues: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`
         };
 
@@ -141,9 +144,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- 2. Event-Listener für Header-Buttons & Overlays ---
+    function setupOverlay(button, overlay) {
+        button.addEventListener('click', () => overlay.classList.add('is-visible'));
+        overlay.querySelector('.close-button').addEventListener('click', () => overlay.classList.remove('is-visible'));
+        overlay.addEventListener('click', (e) => {
+             if (e.target === overlay) {
+                 overlay.classList.remove('is-visible');
+             }
+        });
+    }
+    
+    setupOverlay(headerChatButton, chatOverlay);
+    setupOverlay(headerCostsButton, costsOverlay);
+    setupOverlay(headerShareButton, shareOverlay);
+
     headerChatButton.addEventListener('click', () => {
-        chatOverlay.classList.add('is-visible');
-        if (!isWelcomeMessageShown) {
+         if (!isWelcomeMessageShown) {
             isWelcomeMessageShown = true;
             showTypingIndicator(chatMessagesContainer);
             setTimeout(() => {
@@ -155,17 +171,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             questionInput.focus();
         }
     });
-    closeChatButton.addEventListener('click', () => chatOverlay.classList.remove('is-visible'));
-    
-    headerCostsButton.addEventListener('click', () => costsOverlay.classList.add('is-visible'));
-    closeCostsButton.addEventListener('click', () => costsOverlay.classList.remove('is-visible'));
-    
-    headerShareButton.addEventListener('click', () => {
-        shareOverlay.classList.add('is-visible');
-        phoneInput.focus();
-    });
-    closeShareButton.addEventListener('click', () => shareOverlay.classList.remove('is-visible'));
-
 
     // --- 3. Logik für Folgefragen ---
     async function handleSendQuestion() {
@@ -205,7 +210,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
     
-
     // --- 4. Logik für Kosten-Overlay ---
     calculateCostsButton.addEventListener('click', async () => {
         const userInfo = {
@@ -257,35 +261,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const costsHTML = `
-            ${createCostSection('KFZ-Steuer', costs.vehicle_tax)}
-            ${createCostSection('Versicherung', costs.insurance)}
-            ${createCostSection('Wartung & Reparaturen', costs.maintenance)}
-            ${createCostSection('Spritkosten', costs.fuel_costs)}
             <div class="costs-summary">
                 <h3>Geschätzte Gesamtkosten</h3>
                 <p class="total-annual">${costs.total_annual_cost} € / Jahr</p>
                 <p class="total-monthly">oder ca. ${costs.total_monthly_cost} € / Monat</p>
             </div>
+            ${createCostSection('KFZ-Steuer', costs.vehicle_tax)}
+            ${createCostSection('Versicherung', costs.insurance)}
+            ${createCostSection('Wartung & Reparaturen', costs.maintenance)}
+            ${createCostSection('Spritkosten', costs.fuel_costs)}
         `;
         costsResultContainer.innerHTML = costsHTML;
     }
 
 
-    // --- 5. Logik für WhatsApp Share ---
-    sendWhatsappButton.addEventListener('click', () => {
-        const phoneNumber = phoneInput.value.replace(/[\s+()-]/g, '');
-        if (!/^\d+$/.test(phoneNumber) || phoneNumber.length < 10) {
-            shareStatus.textContent = 'Bitte eine gültige Handynummer eingeben.';
-            shareStatus.style.color = 'var(--accent-red)';
-            return;
-        }
-        shareStatus.textContent = '';
-
-        let textToShare = `*AGA's CarCheck für: ${vehicleTitleElement.textContent}*\n\n`;
+    // --- 5. Logik für Teilen ---
+    function generateShareText() {
+        let textToShare = `*CarCheck AI für: ${vehicleTitleElement.textContent}*\n\n`;
         const priceCard = document.querySelector('.price-card');
         if (priceCard) {
             const price = priceCard.querySelector('.price-tag').innerText;
-            const eval = priceCard.querySelector('.price-evaluation').innerText;
+    //        const eval = priceCard.querySelector('.price-evaluation').innerText;
             const reason = priceCard.querySelector('.price-reasoning').innerText;
             textToShare += `*${price}* - ${eval}\n_${reason}_\n\n`;
         }
@@ -315,11 +311,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             textToShare += formattedChat;
         }
+        return textToShare;
+    }
 
-        const encodedText = encodeURIComponent(textToShare);
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedText}`;
-        window.open(whatsappUrl, '_blank');
-        shareOverlay.classList.remove('is-visible');
+    copyTextButton.addEventListener('click', () => {
+        const text = generateShareText();
+        hiddenShareTextarea.value = text;
+        hiddenShareTextarea.select();
+        try {
+            document.execCommand('copy');
+            shareStatus.textContent = 'Erfolgreich kopiert!';
+            setTimeout(() => { shareStatus.textContent = ''; }, 2000);
+        } catch (err) {
+            shareStatus.textContent = 'Kopieren fehlgeschlagen.';
+            shareStatus.style.color = 'var(--accent-red)';
+        }
     });
 
 
@@ -361,7 +367,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function hideCostsProgressBar(intervalId, progressBar, isError, callback) {
         if (intervalId) clearInterval(intervalId);
         progressBar.style.width = '100%';
-        progressBar.style.backgroundColor = isError ? 'var(--accent-red)' : 'var(--accent-green)';
+        progressBar.style.background = isError ? 'var(--accent-red)' : 'var(--accent-green)';
         setTimeout(() => { if (callback) callback(); }, 700);
     }
     
@@ -372,4 +378,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (e.key === 'Enter') handleSendQuestion();
     });
 });
-

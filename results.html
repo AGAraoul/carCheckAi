@@ -4,129 +4,138 @@
     <meta charset="UTF-8">
     <title>Analyse-Ergebnis</title>
     <link rel="stylesheet" href="results.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="loading">
     <!-- Hauptcontainer für die Erstanalyse -->
     <div class="container">
-        <div class="header">
+        <header class="header">
             <div class="header-content">
-                <h4 id="main-title">AGA's Ergebnis</h4>
+                <h4 id="main-title">CarCheck AI Ergebnis</h4>
                 <h3 id="vehicle-title">Analyse wird geladen...</h3>
             </div>
             <div class="header-actions">
-                <!-- NEU: Theme Switch -->
                 <div class="theme-switch-wrapper">
                     <label class="theme-switch" for="theme-switch-checkbox" title="Toggle Dark/Light Mode">
                         <input type="checkbox" id="theme-switch-checkbox" />
-                        <div class="slider round">
-                             <span class="sun-icon">☀️</span>
-                             <span class="moon-icon">🌙</span>
+                        <div class="slider">
+                             <div class="slider-icon sun">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                             </div>
+                             <div class="slider-icon moon">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                             </div>
                         </div>
                     </label>
                 </div>
                 <button id="header-costs-button" class="header-button" title="Unterhaltskosten berechnen">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 16v-6M12 8h.01"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>
                 </button>
                 <button id="header-chat-button" class="header-button" title="Folgefrage stellen">
                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 </button>
-                <button id="header-share-button" class="header-button" title="Analyse per WhatsApp teilen">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                <button id="header-share-button" class="header-button" title="Analyse teilen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
                 </button>
             </div>
-        </div>
+        </header>
         
-        <div class="analysis-container" id="initial-analysis-container">
+        <main class="analysis-container" id="initial-analysis-container">
             <!-- Die Preiskarte wird hier eingefügt -->
             <div id="price-section-container"></div>
             <!-- Die weitere Analyse wird hier per JavaScript eingefügt -->
-        </div>
+        </main>
     </div>
 
     <!-- Verstecktes Overlay für den Chat mit Folgefragen -->
-    <div class="chat-overlay" id="chat-overlay">
-        <div class="chat-window" id="chat-window">
-            <div class="chat-header">
-                <h4>Chat mit dem KFZ-Meister</h4>
-                <button id="close-chat-button" title="Schließen">&times;</button>
+    <div class="overlay" id="chat-overlay">
+        <div class="modal-window" id="chat-window">
+            <div class="modal-header">
+                <h4>Chat mit dem KI-Meister</h4>
+                <button id="close-chat-button" class="close-button" title="Schließen">&times;</button>
             </div>
-            <div class="chat-messages" id="chat-messages-container">
-                <!-- Nachrichten der Folgefragen werden hier eingefügt -->
-            </div>
-            <div class="chat-input-container">
-                <input type="text" id="question-input" placeholder="Deine Frage...">
-                <button id="send-button" title="Senden">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                </button>
+            <div class="modal-content">
+                <div class="chat-messages" id="chat-messages-container">
+                    <!-- Nachrichten der Folgefragen werden hier eingefügt -->
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="question-input" placeholder="Stelle eine Folgefrage...">
+                    <button id="send-button" title="Senden">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     
     <!-- Verstecktes Overlay für die Kostenberechnung -->
-    <div class="chat-overlay" id="costs-overlay">
-        <div class="chat-window" id="costs-window">
-            <div class="chat-header">
+    <div class="overlay" id="costs-overlay">
+        <div class="modal-window" id="costs-window">
+            <div class="modal-header">
                 <h4>Unterhaltskosten berechnen</h4>
-                <button id="close-costs-button" title="Schließen">&times;</button>
+                <button id="close-costs-button" class="close-button" title="Schließen">&times;</button>
             </div>
-            <div class="costs-form-container" id="costs-form-container">
-                <p class="form-intro">Bitte gib deine Daten ein, um eine genauere Schätzung zu erhalten.</p>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="age-input">Dein Alter</label>
-                        <input type="number" id="age-input" placeholder="z.B. 28">
+            <div class="modal-content">
+                <div class="costs-form-container" id="costs-form-container">
+                    <p class="form-intro">Gib deine Daten ein, um eine genauere Schätzung zu erhalten.</p>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="age-input">Dein Alter</label>
+                            <input type="number" id="age-input" placeholder="z.B. 28">
+                        </div>
+                        <div class="form-group">
+                            <label for="sf-class-input">SF-Klasse</label>
+                            <input type="text" id="sf-class-input" placeholder="z.B. SF10">
+                        </div>
+                        <div class="form-group">
+                            <label for="insurance-type-select">Versicherungsart</label>
+                            <select id="insurance-type-select">
+                                <option value="Vollkasko">Vollkasko</option>
+                                <option value="Teilkasko">Teilkasko</option>
+                                <option value="Haftpflicht">Haftpflicht</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="location-input">PLZ deines Wohnorts</label>
+                            <input type="text" id="location-input" placeholder="z.B. 10115">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="sf-class-input">SF-Klasse</label>
-                        <input type="text" id="sf-class-input" placeholder="z.B. SF10">
-                    </div>
-                    <div class="form-group">
-                        <label for="insurance-type-select">Versicherungsart</label>
-                        <select id="insurance-type-select">
-                            <option value="Vollkasko">Vollkasko</option>
-                            <option value="Teilkasko">Teilkasko</option>
-                            <option value="Haftpflicht">Haftpflicht</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="location-input">PLZ deines Wohnorts</label>
-                        <input type="text" id="location-input" placeholder="z.B. 10115">
-                    </div>
+                    <button id="calculate-costs-button" class="button-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path><path d="M9 12l2 2 4-4"></path></svg>
+                        <span>Berechnen</span>
+                    </button>
                 </div>
-                <button id="calculate-costs-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path><path d="M9 12l2 2 4-4"></path></svg>
-                    Berechnen
-                </button>
-            </div>
-            <div class="costs-result-container" id="costs-result-container">
-                <!-- Die berechneten Kosten werden hier eingefügt -->
+                <div class="costs-result-container" id="costs-result-container">
+                    <!-- Die berechneten Kosten werden hier eingefügt -->
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Verstecktes Overlay für WhatsApp-Versand -->
-    <div class="chat-overlay" id="share-overlay">
-        <div class="chat-window" id="share-window">
-            <div class="chat-header">
-                <h4>Analyse per WhatsApp teilen</h4>
-                <button id="close-share-button" title="Schließen">&times;</button>
+    <!-- Verstecktes Overlay für Teilen -->
+    <div class="overlay" id="share-overlay">
+        <div class="modal-window" id="share-window">
+            <div class="modal-header">
+                <h4>Analyse teilen</h4>
+                <button id="close-share-button" class="close-button" title="Schließen">&times;</button>
             </div>
-            <div class="share-container">
-                <p class="form-intro">Gib deine Handynummer im internationalen Format ein (z.B. 49176...).</p>
-                <div class="form-group">
-                    <label for="phone-input">Handynummer</label>
-                    <input type="tel" id="phone-input" placeholder="z.B. 4917612345678">
+             <div class="modal-content">
+                <div class="share-container">
+                    <p class="form-intro">Teile die komplette Analyse als Text über eine App deiner Wahl.</p>
+                    <button id="copy-text-button" class="button-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <span>Text in Zwischenablage kopieren</span>
+                    </button>
+                    <p id="share-status" class="share-status"></p>
                 </div>
-                <button id="send-whatsapp-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                    Senden
-                </button>
-                <p id="share-status" class="share-status"></p>
             </div>
         </div>
     </div>
+    
+    <textarea id="hidden-share-textarea" style="position: absolute; left: -9999px; top: 0;"></textarea>
 
     <script src="results.js"></script>
 </body>
 </html>
-

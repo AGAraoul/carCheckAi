@@ -2,16 +2,33 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>AGA's CarCheck</title>
+    <title>CarCheck AI</title>
     <link rel="stylesheet" href="popup.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h3>AGA's CarCheck</h3>
+    <div class="header">
+        <svg class="logo" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15.5 14L18 2H6L8.5 10H12.5L10.5 18L17 8.5H12.5L15.5 14Z" stroke="url(#logo-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+                <linearGradient id="logo-gradient" x1="6" y1="2" x2="18" y2="18" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#3b82f6"/>
+                    <stop offset="1" stop-color="#8b5cf6"/>
+                </linearGradient>
+            </defs>
+        </svg>
+        <h3>CarCheck AI</h3>
+    </div>
     <p id="info-text">
-        Analysieren Sie per Screenshot oder Rechtsklick auf markierten Text.
+        Analysieren Sie Fahrzeug-Anzeigen per Screenshot oder Rechtsklick.
     </p>
     <div class="button-container">
-        <button id="analyze-screenshot-button">Screenshot analysieren</button>
+        <button id="analyze-screenshot-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <span>Screenshot analysieren</span>
+        </button>
     </div>
     <div id="status"></div>
     <div id="progress-container" class="hidden">
